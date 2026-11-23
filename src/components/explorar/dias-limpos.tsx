@@ -119,7 +119,7 @@ export function DiasLimpos({
                   )}
                 >
                   {/* biome-ignore lint/performance/noImgElement: miniaturas externas do GIBS */}
-                  <img src={urls[i]} alt="" loading="lazy" className="h-full w-full object-cover" />
+                  <img src={urls[i]} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
                   {eMelhor && (
                     <span className="absolute top-0.5 right-0.5 grid size-4 place-items-center rounded-full bg-sol text-[#0e0e12]">
                       <IconSparkles className="size-2.5" stroke={2} />

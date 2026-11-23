@@ -102,6 +102,7 @@ export function AbaTempo({
                 // biome-ignore lint/performance/noImgElement: imagens externas do GIBS
                 <img
                   key={u}
+                  decoding="async"
                   src={u}
                   alt={i === quadro ? `O lugar em ${anos[i]}` : ""}
                   className="absolute inset-0 h-full w-full object-cover"
