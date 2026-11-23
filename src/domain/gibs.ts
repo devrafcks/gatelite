@@ -1,4 +1,4 @@
-import { somarDias } from "./sol"
+import { somarDias } from "./tempo"
 
 export type IdCamada =
   | "cor-terra"

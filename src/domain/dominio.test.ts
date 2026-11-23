@@ -7,7 +7,8 @@ import { normalizarEpic, urlDaFotoEpic } from "./epic"
 import { caixaAoRedor, destino, distanciaKm, poligonoDaFaixa } from "./geo"
 import { criarSatrec, type ElementoOrbital, passagensSobre, passagensVisiveis, posicaoEm, rastroEntre } from "./orbitas"
 import { SATELITES, satelitePorNorad } from "./satelites"
-import { dataIsoLocal, horaLocal, solDoDia, somarDias } from "./sol"
+import { solDoDia } from "./sol"
+import { dataIsoLocal, horaLocal, somarDias } from "./tempo"
 
 const BRASILIA = { lat: -15.7939, lng: -47.8828 }
 const RIO = { lat: -22.9068, lng: -43.1729 }

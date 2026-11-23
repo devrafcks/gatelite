@@ -3,7 +3,7 @@
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react"
 import { Slider } from "@/components/ui/slider"
 import { CAMADAS, type IdCamada, ID_CAMADAS } from "@/domain/gibs"
-import { somarDias } from "@/domain/sol"
+import { somarDias } from "@/domain/tempo"
 import { dataLonga } from "@/lib/formato"
 import { cn } from "@/lib/utils"
 import { Aviso, Bloco } from "./pecas"
