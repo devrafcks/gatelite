@@ -52,7 +52,7 @@ export default function PaginaMarca() {
           </div>
         </section>
 
-        <section className="grid gap-6 md:grid-cols-3">
+        <section className="revelar grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           <div className="cartao grid place-items-center p-10">
             <Simbolo className="size-28 text-foreground" />
             <p className="mt-6 text-sm text-muted-foreground">Símbolo · 48 × 48</p>
@@ -61,16 +61,16 @@ export default function PaginaMarca() {
             <Logotipo className="h-8 w-full max-w-[18rem] text-foreground" />
             <p className="mt-6 text-sm text-muted-foreground">Logotipo · Anybody 150%, o I em laranja</p>
           </div>
-          <div className="grid place-items-center rounded-2xl bg-[#f4f3f1] p-10 text-[#0e0e12]">
-            <div className="flex items-center gap-2.5">
-              <Simbolo className="size-12" titulo="" />
-              <Logotipo className="h-5" />
+          <div className="grid place-items-center rounded-2xl bg-[#f4f3f1] p-8 text-[#0e0e12] sm:col-span-2 lg:col-span-1">
+            <div className="flex max-w-full items-center gap-2.5">
+              <Simbolo className="size-12 shrink-0" titulo="" />
+              <Logotipo className="h-5 min-w-0" />
             </div>
             <p className="mt-8 text-sm text-[#6b6a72]">Versão sobre fundo claro</p>
           </div>
         </section>
 
-        <section>
+        <section className="revelar">
           <h2 className="titulo-display mb-8 text-3xl font-light">Cores</h2>
           <ul className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
             {CORES.map((c) => (
@@ -86,7 +86,7 @@ export default function PaginaMarca() {
           </ul>
         </section>
 
-        <section className="grid gap-6 lg:grid-cols-3">
+        <section className="revelar grid gap-6 lg:grid-cols-3">
           <div className="cartao p-8 lg:col-span-2">
             <p className="text-sm text-muted-foreground">Display · Anybody</p>
             <p className="titulo-display mt-4 text-6xl font-light">Vista de cima.</p>
@@ -106,7 +106,7 @@ export default function PaginaMarca() {
           </div>
         </section>
 
-        <section>
+        <section className="revelar">
           <h2 className="titulo-display mb-8 text-3xl font-light">Adesivos</h2>
           <div className="faixa grid grid-cols-3 gap-6 rounded-3xl border p-8 sm:grid-cols-4 lg:grid-cols-7">
             {ADESIVOS.map((t) => (
@@ -117,7 +117,7 @@ export default function PaginaMarca() {
           </div>
         </section>
 
-        <section>
+        <section className="revelar">
           <h2 className="titulo-display mb-8 text-3xl font-light">Baixar</h2>
           <ul className="divide-y rounded-2xl border bg-card">
             {ARQUIVOS.map((a) => (
