@@ -28,13 +28,15 @@
 
 ## O que dá para fazer
 
-**Ver o seu lugar de cima.** O explorador abre um globo com o mosaico diário dos satélites da NASA (VIIRS e MODIS), Landsat e Sentinel a 30 m, infravermelho, luzes da noite, temperatura e fumaça. Para chegar no nível da rua, a camada *Detalhe* usa um mosaico de alta resolução: dá para ver casas, quadras e o Cristo Redentor.
+**Ver o seu lugar de cima.** O explorador abre um globo com o mosaico diário dos satélites da NASA (VIIRS e MODIS), Landsat e Sentinel a 30 m, infravermelho, luzes da noite, temperatura e fumaça. Para chegar no nível da rua, a camada *Detalhe* usa um mosaico de alta resolução: dá para ver casas, quadras e o Cristo Redentor. Quando o zoom passa do que a imagem do dia consegue mostrar, o mapa troca sozinho para o *Detalhe* em vez de exibir pixels borrados, e um toque volta para a camada anterior.
 
 **Achar o dia sem nuvem.** A aba Tempo mostra os últimos 14 dias do lugar lado a lado e mede a nuvem de cada um pela cor da imagem. Um toque leva ao dia mais limpo. Junto vêm o nascer e o pôr do Sol e a duração do dia.
 
 **Saber quem passou por cima.** As passagens das últimas e das próximas 24 horas são calculadas no navegador (SGP4, num Web Worker) para 14 satélites: se o lugar caiu dentro da faixa de imagem, de dia ou de noite, e o atalho para a foto daquele dia.
 
 **Ver como mudou.** Time-lapse do mesmo dia do ano, de 2001 até hoje, e antes e depois com cortina arrastável.
+
+**Guardar os seus lugares.** Os lugares salvos ficam só no aparelho, sem conta. Cada cartão mostra o lugar de perto e, passando o mouse, a foto mais recente da NASA, com o nascer e o pôr do Sol de hoje.
 
 **Acompanhar o planeta agora.** Um mapa-múndi com o lado do dia e o da noite andando em tempo real, as luzes das cidades, o ponto onde o Sol está a pino, a frota de satélites e os eventos naturais ativos (queimadas, tempestades, vulcões e icebergs).
 
