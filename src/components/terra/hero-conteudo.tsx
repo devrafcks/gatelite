@@ -3,7 +3,6 @@ import Link from "next/link"
 import { BuscaRapida } from "@/components/site/busca-rapida"
 import { Button } from "@/components/ui/button"
 
-// O texto do hero, usado pelo hero que gira com a rolagem e pelo de reserva.
 export function TituloDoHero() {
   return (
     <>

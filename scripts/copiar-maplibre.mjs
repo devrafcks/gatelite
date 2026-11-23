@@ -1,4 +1,3 @@
-// Copia o worker do MapLibre para public/, servido como arquivo estático.
 import { copyFileSync, mkdirSync } from "node:fs"
 import { createRequire } from "node:module"
 import { dirname, join } from "node:path"

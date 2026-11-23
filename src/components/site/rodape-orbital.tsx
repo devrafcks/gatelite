@@ -8,14 +8,6 @@ import { CORES, LOGOTIPO } from "@/components/brand/marca-dados"
 import { cn } from "@/lib/utils"
 import { Adesivo, ROTULOS_ADESIVO, type TipoAdesivo } from "./adesivos"
 
-// O rodapé: uma moldura escura, um painel de céu noturno com três colunas e o GATÉLITE
-// gigante afundando na borda de baixo, com adesivos colados por cima.
-//
-// A coreografia: quando o rodapé entra na tela, o painel cresce, as colunas sobem, o
-// logotipo se desenha num traço contínuo e cada adesivo bate no lugar quando o traço
-// passa por baixo dele. Depois vira brinquedo: arraste os adesivos (eles inclinam com o
-// arremesso), dê dois cliques para mandar um de volta, clique no GATÉLITE para desenhar de novo.
-
 type Coluna = { tag: string; itens: { rotulo: string; href: string }[] }
 
 const COLUNAS: Coluna[] = [
@@ -37,7 +29,6 @@ const COLUNAS: Coluna[] = [
   },
 ]
 
-// onde cada adesivo cola, em % da caixa do logotipo: em cima das letras, inclinados
 const ADESIVOS: { tipo: TipoAdesivo; x: number; y: number; tamanho: number; giro: number; prof: number }[] = [
   { tipo: "selo", x: 10, y: -6, tamanho: 9.5, giro: -10, prof: 1 },
   { tipo: "satelite", x: 24, y: -16, tamanho: 9.5, giro: 12, prof: 0.6 },
@@ -78,14 +69,12 @@ export function RodapeOrbital() {
     andou: boolean
   } | null>(null)
 
-  // comprimento real de cada contorno, para o traço se desenhar
   useEffect(() => {
     traco.current?.querySelectorAll<SVGPathElement>("path").forEach((p) => {
       p.style.setProperty("--l", `${Math.ceil(p.getTotalLength()) + 2}px`)
     })
   }, [rodada])
 
-  // a coreografia roda uma vez, quando um quinto do rodapé aparece
   useEffect(() => {
     const el = raiz.current
     if (!el || typeof IntersectionObserver === "undefined") return setVisto(true)
@@ -102,7 +91,6 @@ export function RodapeOrbital() {
     return () => io.disconnect()
   }, [])
 
-  // ligado à rolagem: o painel cresce enquanto o rodapé ocupa a tela
   useEffect(() => {
     const el = raiz.current
     if (!el) return
@@ -138,7 +126,6 @@ export function RodapeOrbital() {
       await navigator.clipboard.writeText(window.location.origin)
       setCopiado(true)
     } catch {
-      // sem permissão de área de transferência: não faz nada
     }
   }
 
@@ -168,7 +155,6 @@ export function RodapeOrbital() {
       return n
     })
     balancar(botao.querySelector(".ro-ad-erguer"), BATIDA, 420)
-    // biome-ignore lint/correctness/useExhaustiveDependencies: quadros são constantes
   }, [])
 
   const aoApertar = (e: React.PointerEvent<HTMLButtonElement>, i: number) => {
@@ -191,7 +177,6 @@ export function RodapeOrbital() {
     a.andou = true
     host.style.left = `${limitar(a.x0 + (dx / a.w) * 100, 1, 99)}%`
     host.style.top = `${limitar(a.y0 + (dy / a.h) * 100, -80, 90)}%`
-    // inclina com o arremesso: a velocidade, suavizada
     const agora = performance.now()
     const v = (e.clientX - a.lx) / Math.max(1, agora - a.t)
     a.giro = a.giro * 0.75 + limitar(v * 22, -24, 24) * 0.25
@@ -237,7 +222,6 @@ export function RodapeOrbital() {
     setRodada((r) => r + 1)
   }
 
-  // paralaxe leve dos adesivos com o mouse
   const aoPassar = (e: React.PointerEvent<HTMLElement>) => {
     const el = raiz.current
     if (!el || e.pointerType !== "mouse") return
@@ -246,7 +230,6 @@ export function RodapeOrbital() {
     el.style.setProperty("--ro-py", (((e.clientY - r.top) / r.height - 0.5) * 2).toFixed(3))
   }
 
-  // caixa do logotipo; ele pousa na borda de baixo, quase inteiro à vista
   const pad = 2
   const vbX = -pad
   const vbY = LOGOTIPO.topo - pad
@@ -371,7 +354,6 @@ export function RodapeOrbital() {
                       zIndex: 3 + Math.max(0, ordem.indexOf(i) + 1),
                       "--giro": `${a.giro}deg`,
                       "--prof": a.prof,
-                      // bate no lugar quando o traço passa por baixo
                       "--em": `${(TRACO_INICIO + TRACO_DURACAO * (a.x / 100) ** 0.92 + 0.1).toFixed(2)}s`,
                     } as React.CSSProperties
                   }

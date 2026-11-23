@@ -1,17 +1,12 @@
 import type { IdCamada } from "./gibs"
 
-// Os satélites acompanhados. Os números são do catálogo NORAD; resolução e faixa são as do
-// instrumento principal de imagem. A camada GIBS liga o satélite à foto que ele tira.
 export type Satelite = {
   readonly norad: number
   readonly nome: string
   readonly operador: string
   readonly sensor: string
-  /** melhor resolução do sensor principal, em metros */
   readonly resolucaoM: number
-  /** largura da faixa de imagem no chão, em km (0 = não fotografa a Terra) */
   readonly faixaKm: number
-  /** só enxerga com luz do Sol? */
   readonly optico: boolean
   readonly camada?: IdCamada
   readonly resumo: string

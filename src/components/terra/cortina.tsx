@@ -4,8 +4,6 @@ import { IconArrowsHorizontal } from "@tabler/icons-react"
 import { useRef } from "react"
 import { cn } from "@/lib/utils"
 
-// Antes e depois: duas imagens empilhadas, a de cima recortada por uma cortina arrastável.
-// Arrastar só muda uma variável CSS (--pos): nada de re-render a cada movimento do dedo.
 export function Cortina({
   antes,
   depois,
@@ -48,7 +46,6 @@ export function Cortina({
       }}
       onPointerMove={(e) => e.buttons === 1 && mover(e.clientX)}
     >
-      {/* biome-ignore lint/performance/noImgElement: imagens externas do GIBS */}
       <img
         src={depois}
         alt={rotuloDepois}
@@ -58,7 +55,6 @@ export function Cortina({
         draggable={false}
       />
       <div className="absolute inset-0" style={{ clipPath: "inset(0 calc(100% - var(--pos)) 0 0)" }}>
-        {/* biome-ignore lint/performance/noImgElement: imagens externas do GIBS */}
         <img
           src={antes}
           alt={rotuloAntes}

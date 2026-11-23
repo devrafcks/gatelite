@@ -2,9 +2,6 @@
 
 import { useCallback, useRef } from "react"
 
-// Efeito magnético: com o mouse por cima, o elemento anda até 30% da distância até o
-// cursor (no máximo ~7 px) e o conteúdo vai um pouco mais longe, dando profundidade.
-// Só com mouse e só para quem não pediu movimento reduzido.
 const FORCA = 0.3
 const MAXIMO = 7
 

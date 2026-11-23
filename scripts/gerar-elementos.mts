@@ -1,5 +1,3 @@
-// Cópia local dos elementos orbitais (OMM da CelesTrak), usada quando a CelesTrak não
-// responde e nos testes. Rodar: pnpm elementos
 import { writeFileSync } from "node:fs"
 import { SATELITES } from "../src/domain/satelites.ts"
 

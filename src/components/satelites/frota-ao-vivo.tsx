@@ -15,7 +15,6 @@ import { useFrota } from "@/lib/consultas"
 import { coordenada, numero } from "@/lib/formato"
 import { cn } from "@/lib/utils"
 
-// o globo (d3 + canvas) só baixa nesta página
 const GloboPontilhado = dynamic(() => import("@/components/terra/globo-pontilhado").then((m) => m.GloboPontilhado), {
   ssr: false,
   loading: () => <Skeleton className="aspect-square w-full rounded-full" />,
@@ -24,7 +23,6 @@ const GloboPontilhado = dynamic(() => import("@/components/terra/globo-pontilhad
 export function FrotaAoVivo() {
   const { frota, isPending, isError, error, data } = useFrota()
   const [destaque, setDestaque] = useState<number>(49260)
-  // o relógio começa no navegador: no prerender não há "agora"
   const [agora, setAgora] = useState(0)
   const [lugar, setLugar] = useState<(LatLng & { nome: string }) | null>(null)
 
@@ -38,7 +36,6 @@ export function FrotaAoVivo() {
   const pos = atual && agora ? posicaoEm(atual.satrec, new Date(agora)) : null
   const ladoDoDia = pos ? elevacaoDoSol(new Date(agora), pos.lat, pos.lng) > 0 : false
 
-  // a próxima vez que o satélite escolhido cobre o seu lugar (recalcula só quando muda)
   const minuto = Math.floor(agora / 60_000)
   const proxima = useMemo(() => {
     if (!atual || !lugar || !minuto || atual.sat.faixaKm === 0) return null

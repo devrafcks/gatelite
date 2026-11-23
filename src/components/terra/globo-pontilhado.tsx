@@ -7,17 +7,8 @@ import { posicaoEm, rastroEntre } from "@/domain/orbitas"
 import type { useFrota } from "@/lib/consultas"
 import { cn } from "@/lib/utils"
 
-// O globo pontilhado: continentes em meio-tom e, por cima, os satélites que o Gatélite
-// acompanha, na posição de agora, com o rastro dos últimos minutos.
-//
-// Desempenho: os pontos dos continentes vêm prontos (scripts/gerar-pontos-terra.mjs) e
-// viram vetores 3D uma vez só. A cada quadro, girar e projetar cada ponto custa algumas
-// multiplicações; tudo é desenhado num caminho só. A animação roda a 30 quadros por
-// segundo, pausa fora da tela ou com a aba escondida, e a densidade de pixels é limitada.
-
 type Frota = ReturnType<typeof useFrota>["frota"]
 
-// cos/sen de latitude e longitude de cada ponto, guardados lado a lado
 let cachePontos: Promise<Float32Array> | null = null
 const carregarPontos = () => {
   cachePontos ??= fetch("/dados/pontos-terra.json")
@@ -102,7 +93,6 @@ export function GloboPontilhado({
       ultimoDesenho = 0
     }
 
-    // ponto (lat, lng em graus) está no lado visível? mesmo critério da projeção do d3
     const visivel = (lng: number, lat: number) => {
       const r = Math.PI / 180
       const l = (lng + rotacao[0]) * r
@@ -143,7 +133,6 @@ export function GloboPontilhado({
       ctx.lineWidth = 0.7
       ctx.stroke()
 
-      // continentes: rotação e projeção ortográfica feitas à mão, sem chamar o d3 por ponto
       if (pontos) {
         const r = Math.PI / 180
         const cL = Math.cos(rotacao[0] * r)
@@ -228,7 +217,6 @@ export function GloboPontilhado({
     const laco = (agora: number) => {
       quadro = requestAnimationFrame(laco)
       if (!naTela || document.hidden) return
-      // arrastando: todo quadro; girando sozinho: 30 por segundo basta
       if (!arrastando && agora - ultimoDesenho < QUADRO_MS) return
       const dt = ultimoDesenho ? Math.min(100, agora - ultimoDesenho) : QUADRO_MS
       ultimoDesenho = agora
@@ -249,7 +237,6 @@ export function GloboPontilhado({
       }
       const dx = e.clientX - arrastando.x
       const dy = e.clientY - arrastando.y
-      // no toque, só captura quando o gesto é mais horizontal: o vertical rola a página
       if (e.pointerType !== "mouse" && Math.abs(dy) > Math.abs(dx) * 1.2 && Math.abs(dx) < 8) return
       if (!canvas.hasPointerCapture(e.pointerId)) canvas.setPointerCapture(e.pointerId)
       const k = 280 / raio
@@ -294,7 +281,6 @@ export function GloboPontilhado({
       canvas.removeEventListener("pointerup", soltar)
       canvas.removeEventListener("pointercancel", soltar)
     }
-    // biome-ignore lint/correctness/useExhaustiveDependencies: o globo nasce uma vez; dados vivos vêm pelo ref
   }, [girar, inclinacao])
 
   return (

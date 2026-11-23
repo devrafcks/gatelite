@@ -3,7 +3,6 @@
 import { create } from "zustand"
 import { createJSONStorage, persist } from "zustand/middleware"
 
-// Lugares salvos ficam no aparelho: não há conta nem banco.
 export type LugarSalvo = {
   readonly id: string
   readonly nome: string

@@ -5,7 +5,6 @@ import { useState } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useApod } from "@/lib/consultas"
 
-// A foto astronômica do dia (APOD). O texto vem em inglês, direto da NASA.
 export function FotoDoDia() {
   const apod = useApod()
   const [inteiro, setInteiro] = useState(false)
@@ -21,7 +20,6 @@ export function FotoDoDia() {
   return (
     <article className="cartao overflow-hidden">
       {a.tipo === "image" ? (
-        // biome-ignore lint/performance/noImgElement: imagem externa da NASA
         <img src={a.url} alt={a.titulo} className="aspect-[4/3] w-full object-cover" loading="lazy" decoding="async" />
       ) : a.tipo === "video" ? (
         <iframe src={a.url} title={a.titulo} className="aspect-video w-full" allow="encrypted-media" loading="lazy" />

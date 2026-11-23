@@ -10,7 +10,6 @@ import "@/styles/hero-orbital.css"
 
 const geist = Geist({ variable: "--font-geist-sans", subsets: ["latin"] })
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] })
-// a mesma família larga do logotipo, usada nas chamadas grandes
 const display = Anybody({ variable: "--font-display-face", subsets: ["latin"], axes: ["wdth"] })
 
 export const metadata: Metadata = {
@@ -86,13 +85,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geist.variable} ${geistMono.variable} ${display.variable} dark h-full antialiased`}
     >
       <body className="min-h-full">
-        {/* antes de qualquer pintura: quem já viu a abertura não vê de novo */}
-        {/* biome-ignore lint/security/noDangerouslySetInnerHtml: script estático de uma linha */}
         <script dangerouslySetInnerHTML={{ __html: SCRIPT_ABERTURA }} />
-        {/* dados estruturados: o Google entende que é um aplicativo web gratuito, em português */}
         <script
           type="application/ld+json"
-          // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD estático, gerado aqui
           dangerouslySetInnerHTML={{ __html: JSON.stringify(DADOS_ESTRUTURADOS) }}
         />
         <Provedores>

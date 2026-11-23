@@ -9,15 +9,11 @@ import { DesfechoDoHero, TituloDoHero } from "./hero-conteudo"
 import { HeroOrbital } from "./hero-orbital"
 import { COR_DA_CATEGORIA, IconeEvento } from "./icone-evento"
 
-// Partes da página que vêm do servidor com cache. Se a NASA não responder, mostram um
-// estado digno em vez de derrubar a página.
-
 export async function TerraDeHoje() {
   let fotos: Awaited<ReturnType<typeof buscarFotosEpic>> = []
   try {
     fotos = await buscarFotosEpic()
   } catch {
-    // estado vazio abaixo
   }
   if (!fotos.length) {
     return (
@@ -29,7 +25,6 @@ export async function TerraDeHoje() {
   return <GiroDaTerra fotos={fotos} />
 }
 
-// hero de reserva, parado: enquanto as fotos chegam ou se a EPIC não responder
 export function HeroEstatico() {
   return (
     <section className="estrelas relative overflow-hidden text-white">
@@ -48,7 +43,6 @@ export async function HeroDaTerra() {
   try {
     fotos = await buscarFotosEpic()
   } catch {
-    // reserva abaixo
   }
   if (fotos.length < 2) return <HeroEstatico />
   return <HeroOrbital fotos={fotos} topo={<Cabecalho />} titulo={<TituloDoHero />} desfecho={<DesfechoDoHero fotos={fotos.length} />} />
@@ -59,13 +53,11 @@ export async function EventosAgora() {
   try {
     eventos = (await buscarEventos()).eventos
   } catch {
-    // estado vazio abaixo
   }
   if (!eventos.length) {
     return <p className="text-muted-foreground">O catálogo de eventos da NASA não respondeu agora.</p>
   }
   const contagem = contarPorCategoria(eventos).slice(0, 5)
-  // os mais recentes, mas um de cada categoria por vez: senão os icebergs tomam a lista
   const porData = [...eventos].sort((a, b) => b.data.localeCompare(a.data))
   const filas = contagem.map(([cat]) => porData.filter((x) => x.categoria === cat))
   const recentes: (typeof eventos)[number][] = []

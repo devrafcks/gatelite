@@ -9,8 +9,6 @@ export const metadata: Metadata = {
   robots: { index: false },
 }
 
-// 404: a página caiu fora da faixa que o satélite varre. Um sensor passa, a linha de
-// varredura desce pela faixa, e o seu ponto fica do lado de fora, sem imagem.
 export default function NaoEncontrada() {
   return (
     <div className="estrelas relative flex min-h-svh flex-col overflow-hidden bg-background text-foreground">
@@ -32,7 +30,6 @@ export default function NaoEncontrada() {
             </clipPath>
           </defs>
 
-          {/* o chão: um horizonte pontilhado, curvo como o planeta */}
           <g fill="rgb(214 212 206 / 0.45)">
             {Array.from({ length: 64 }, (_, i) => {
               const x = 10 + i * 9.8
@@ -41,14 +38,12 @@ export default function NaoEncontrada() {
             })}
           </g>
 
-          {/* a faixa que o sensor enxerga */}
           <polygon points="300,40 340,40 430,250 210,250" fill="url(#nf-faixa)" />
           <path d="M300 40L210 250M340 40L430 250" stroke="#ffb547" strokeOpacity="0.45" strokeDasharray="3 5" />
           <g clipPath="url(#nf-recorte)">
             <rect className="nf-varredura" x="200" y="40" width="240" height="3" fill="url(#nf-varredura)" />
           </g>
 
-          {/* o satélite */}
           <g transform="translate(320 30)">
             <rect x="-34" y="-6" width="22" height="12" rx="2" fill="#1d3a8f" stroke="#6ea0ff" strokeWidth="1" />
             <rect x="12" y="-6" width="22" height="12" rx="2" fill="#1d3a8f" stroke="#6ea0ff" strokeWidth="1" />
@@ -56,7 +51,6 @@ export default function NaoEncontrada() {
             <rect x="-6" y="-4" width="12" height="5" rx="1.5" fill="#ff5a1f" />
           </g>
 
-          {/* o ponto que ninguém fotografou */}
           <g transform="translate(528 262)">
             <circle r="16" fill="#ff5a1f" opacity="0.18" className="nf-pulso" />
             <circle r="5" fill="#fff" stroke="#ff5a1f" strokeWidth="2.5" />

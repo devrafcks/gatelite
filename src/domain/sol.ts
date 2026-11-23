@@ -6,8 +6,6 @@ export const elevacaoDoSol = (data: Date, lat: number, lng: number): number => {
   return Horizon(data, obs, eq.ra, eq.dec, "normal").altitude
 }
 
-// Sem o fuso oficial, a hora local sai da longitude (hora solar média). Para dizer
-// "de manhã" ou "à noite" sobre uma passagem é o que importa.
 export const fusoPelaLongitude = (lng: number) => Math.round(lng / 15) * 60
 
 export const horaLocal = (instante: Date | number, fusoMin: number): string => {
@@ -23,11 +21,8 @@ export const somarDias = (iso: string, dias: number): string => {
   return new Date(Date.UTC(a, m - 1, d + dias)).toISOString().slice(0, 10)
 }
 
-// Nascer e pôr do Sol num dia (meia-noite UTC como ponto de partida, que basta para a
-// hora solar local exibida) e a duração do dia em minutos.
 export const solDoDia = (dataIso: string, lat: number, lng: number) => {
   const obs = new Observer(lat, lng, 0)
-  // começa ao meio-dia solar anterior para pegar o nascer e o pôr do mesmo dia local
   const inicio = new Date(Date.parse(`${dataIso}T00:00:00Z`) - (lng / 15) * 3_600_000)
   const nascer = SearchRiseSet(Body.Sun, obs, +1, inicio, 1)?.date ?? null
   const por = nascer ? (SearchRiseSet(Body.Sun, obs, -1, nascer, 1)?.date ?? null) : null

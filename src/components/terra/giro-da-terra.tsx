@@ -7,8 +7,6 @@ import { imagemOtimizada, preCarregar } from "@/lib/imagens"
 import { numero } from "@/lib/formato"
 import { cn } from "@/lib/utils"
 
-// A Terra girando com as fotos reais do dia. Arrastar na horizontal gira o planeta:
-// cada foto é uma hora diferente, e o lado iluminado anda de leste para oeste.
 export function GiroDaTerra({
   fotos,
   className,
@@ -25,7 +23,6 @@ export function GiroDaTerra({
   const [carregadas, setCarregadas] = useState<Set<number>>(() => new Set())
   const arraste = useRef<{ x: number; i: number } | null>(null)
   const n = fotos.length
-  // miniaturas já são leves; as fotos grandes passam pelo otimizador
   const atributos = useMemo(
     () =>
       fotos.map((f) =>
@@ -39,7 +36,6 @@ export function GiroDaTerra({
     setCarregadas(new Set())
   }, [fotos])
 
-  // pré-carrega todas; só anima depois que a seguinte estiver pronta
   useEffect(() => {
     let cancelado = false
     atributos.forEach((a, i) => {
@@ -86,7 +82,6 @@ export function GiroDaTerra({
         aria-label={`A Terra fotografada pela câmera EPIC em ${foto.data.slice(0, 10)}, ${horaUtc} UTC`}
       >
         {fotos.map((f, i) => (
-          // biome-ignore lint/performance/noImgElement: imagens externas da NASA, já otimizadas
           <img
             key={f.id}
             src={atributos[i]?.src}
@@ -97,7 +92,6 @@ export function GiroDaTerra({
             draggable={false}
             loading={i === 0 ? "eager" : "lazy"}
             className={cn(
-              // a foto EPIC tem margem preta: amplia até o disco encostar na borda
               "absolute inset-0 h-full w-full scale-[1.2] object-cover transition-opacity duration-700",
               i === indice ? "opacity-100" : "opacity-0",
             )}
@@ -119,7 +113,6 @@ export function GiroDaTerra({
           </span>
         </div>
       )}
-      {/* escolher o horário: cada botão é uma foto do dia, na hora em que foi tirada */}
       {mostrarControles && (
         <div className="mt-3 flex flex-wrap gap-1.5" role="radiogroup" aria-label="Horário da foto (UTC)">
           {fotos.map((f, i) => (

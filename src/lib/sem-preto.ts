@@ -2,9 +2,6 @@
 
 import { useEffect, useState } from "react"
 
-// Os mosaicos de reflectância do GIBS pintam de preto opaco onde não há dado (noite polar,
-// faixas ainda não processadas), mesmo pedindo TRANSPARENT. Como o GIBS libera CORS, dá para
-// abrir a imagem num canvas e apagar esse preto, deixando aparecer o que está por baixo.
 export function useImagemSemPreto(url: string | null, limiar = 10) {
   const [limpa, setLimpa] = useState<string | null>(null)
 

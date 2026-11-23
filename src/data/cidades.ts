@@ -1,5 +1,3 @@
-// Sugestões instantâneas, sem rede: capitais e cidades grandes do Brasil e alguns lugares
-// clássicos de imagem de satélite. Aparecem enquanto a busca de verdade ainda responde.
 export type Cidade = { readonly nome: string; readonly detalhe: string; readonly lat: number; readonly lng: number }
 
 export const CIDADES: readonly Cidade[] = [

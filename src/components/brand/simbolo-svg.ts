@@ -1,6 +1,5 @@
 import { CORES, LOGOTIPO, SIMBOLO } from "./marca-dados"
 
-// O símbolo como texto SVG, para onde não dá para usar componente React (imagens sociais).
 export const simboloSvg = (cor = "#f4f3f1") => {
   const S = SIMBOLO
   const faixas = S.faixas.map((y) => `<rect x="20" y="${y}" width="80" height="${S.faixaAltura}" rx="${S.faixaAltura / 2}"/>`).join("")
@@ -9,8 +8,6 @@ export const simboloSvg = (cor = "#f4f3f1") => {
 
 export const simboloDataUri = (cor?: string) => `data:image/svg+xml;utf8,${encodeURIComponent(simboloSvg(cor))}`
 
-
-// O logotipo em curvas (GATÉLITE com o I laranja), também como texto SVG.
 export const logotipoDataUri = (cor = "#f4f3f1") => {
   const altura = LOGOTIPO.base - LOGOTIPO.topo
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 ${LOGOTIPO.topo - 1} ${LOGOTIPO.largura + 2} ${altura + 2}"><g transform="translate(1 0)"><path d="${LOGOTIPO.d}" fill="${cor}"/><path d="${LOGOTIPO.destaque}" fill="${CORES.laranja}"/></g></svg>`

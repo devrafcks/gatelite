@@ -12,7 +12,6 @@ import { dataIsoLocal, horaLocal, solDoDia, somarDias } from "./sol"
 const BRASILIA = { lat: -15.7939, lng: -47.8828 }
 const RIO = { lat: -22.9068, lng: -43.1729 }
 const elemento = (norad: number) => (elementos as ElementoOrbital[]).find((e) => e.NORAD_CAT_ID === norad) as ElementoOrbital
-// perto da época dos elementos, onde o SGP4 é mais preciso
 const EPOCA = Date.parse(`${elemento(25544).EPOCH}Z`)
 
 describe("geo", () => {
@@ -178,7 +177,6 @@ describe("terminador", () => {
     expect(pontoSubsolar(d).lat).toBeCloseTo(-23.4, 0)
     const p = poligonoDaNoite(d)
     expect(p.at(-2)?.[1]).toBe(90)
-    // à meia-noite (lng 180) o terminador fica bem ao sul: quase todo o meridiano está no escuro
     const meiaNoite = p.find(([lng]) => lng === 180)
     expect(meiaNoite?.[1]).toBeLessThan(-60)
   })

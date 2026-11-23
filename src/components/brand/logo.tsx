@@ -2,8 +2,6 @@ import { useId } from "react"
 import { cn } from "@/lib/utils"
 import { CORES, LOGOTIPO, SIMBOLO } from "./marca-dados"
 
-// O gato sentado no planeta, olhando a estrela. Desenhado a partir dos mesmos dados que
-// geram os SVGs da marca (scripts/gerar-marca.mjs).
 export function DesenhoDoSimbolo({ cor = "currentColor", id }: { cor?: string; id: string }) {
   const S = SIMBOLO
   return (

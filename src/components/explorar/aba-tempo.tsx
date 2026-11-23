@@ -12,7 +12,6 @@ import { Aviso, Bloco, Segmentos } from "./pecas"
 
 type Modo = "timelapse" | "comparar"
 
-// raio da janela da imagem a partir do zoom do mapa: aproximar mostra menos chão
 const raioPeloZoom = (z: number) => Math.max(25, Math.min(900, 40_000 / 2 ** z))
 
 export function AbaTempo({
@@ -31,7 +30,6 @@ export function AbaTempo({
   aoEscolherDia: (dia: string) => void
 }) {
   const [modo, setModo] = useState<Modo>("timelapse")
-  // camadas esparsas ou fixas não servem para time-lapse: usa a cor real do Terra
   const base = CAMADAS[camada].dataFixa || camada === "hls" ? CAMADAS["cor-terra"] : CAMADAS[camada]
   const gibsId = base.gibs[0] as string
   const anos = useMemo(() => anosDoTimelapse(data, base.desde), [data, base.desde])
@@ -51,7 +49,6 @@ export function AbaTempo({
     setCarregadas(new Set())
   }, [anos.length])
 
-  // pré-carrega os anos em ordem, sem disparar tudo de uma vez
   useEffect(() => {
     let cancelado = false
     setCarregadas(new Set())
@@ -99,7 +96,6 @@ export function AbaTempo({
           <div className="relative overflow-hidden rounded-2xl bg-noite" style={{ aspectRatio: "3 / 2" }}>
             {urls.map((u, i) =>
               Math.abs(i - quadro) <= 1 || i === quadro ? (
-                // biome-ignore lint/performance/noImgElement: imagens externas do GIBS
                 <img
                   key={u}
                   decoding="async"

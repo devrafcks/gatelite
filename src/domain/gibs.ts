@@ -1,7 +1,5 @@
 import { somarDias } from "./sol"
 
-// Camadas do NASA GIBS (Worldview). Cada uma é um mosaico global diário servido em
-// blocos (WMTS) ou como uma imagem só de uma área (WMS).
 export type IdCamada =
   | "cor-terra"
   | "cor-aqua"
@@ -19,16 +17,12 @@ export type Camada = {
   readonly nome: string
   readonly descricao: string
   readonly fonte: string
-  /** identificadores GIBS, desenhados nessa ordem */
   readonly gibs: readonly string[]
   readonly formato: "jpg" | "png"
   readonly nivelMaximo: number
   readonly desde: string
-  /** data fixa (camadas anuais ou estáticas) */
   readonly dataFixa?: string
-  /** camada de fundo quando esta é transparente ou esparsa */
   readonly fundo?: IdCamada
-  /** blocos de outra fonte (fora do GIBS), com a atribuição exigida */
   readonly blocos?: { readonly url: string; readonly atribuicao: string }
   readonly grupo: "cor" | "detalhe" | "ciencia"
 }
@@ -167,22 +161,16 @@ export const urlDosBlocos = (gibsId: string, c: Camada, data: string) =>
 
 export type Caixa = { sul: number; norte: number; oeste: number; leste: number }
 
-// Uma imagem só, de uma área, para o time-lapse e as miniaturas. WMS 1.3.0 em EPSG:4326
-// usa a ordem latitude, longitude na caixa.
 export const urlDaImagem = (gibsId: string, data: string, caixa: Caixa, largura = 720, altura = 480, formato: "jpg" | "png" = "jpg") =>
   `${BASE}/wms/epsg4326/best/wms.cgi?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=${gibsId}&CRS=EPSG:4326&BBOX=${caixa.sul},${caixa.oeste},${caixa.norte},${caixa.leste}&WIDTH=${largura}&HEIGHT=${altura}&FORMAT=image/${formato === "jpg" ? "jpeg" : "png"}${formato === "png" ? "&TRANSPARENT=TRUE" : ""}&TIME=${data}`
 
-// O mosaico de hoje ainda está sendo montado; o de ontem já cobre o planeta.
 export const dataPadrao = (hojeUtc: string) => somarDias(hojeUtc, -1)
 
-// O dia mais recente com o mosaico completo. As últimas passagens de um dia (as Américas,
-// à tarde) só ficam prontas horas depois da meia-noite UTC: até as 15 h UTC, anteontem.
 export const dataCompleta = (agora: Date) => {
   const hoje = agora.toISOString().slice(0, 10)
   return somarDias(hoje, agora.getUTCHours() < 15 ? -2 : -1)
 }
 
-// mesmo dia do ano, ano a ano, para o time-lapse
 export const anosDoTimelapse = (dataBase: string, desde: string, passo = 1) => {
   const [a, m, d] = dataBase.split("-")
   const anoFinal = Number(a)
@@ -193,6 +181,5 @@ export const anosDoTimelapse = (dataBase: string, desde: string, passo = 1) => {
   return datas
 }
 
-// Uma imagem só do mosaico detalhado em volta de um ponto (Esri World Imagery, export).
 export const urlDoMosaicoDetalhado = (caixa: Caixa, largura = 480, altura = 360) =>
   `https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export?bbox=${caixa.oeste},${caixa.sul},${caixa.leste},${caixa.norte}&bboxSR=4326&imageSR=3857&size=${largura},${altura}&format=jpg&f=image`

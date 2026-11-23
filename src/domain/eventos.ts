@@ -1,6 +1,5 @@
 import { distanciaKm, type LatLng } from "./geo"
 
-// Eventos naturais do NASA EONET, já normalizados para a interface.
 export type CategoriaEvento =
   | "wildfires"
   | "severeStorms"

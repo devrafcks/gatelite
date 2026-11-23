@@ -19,7 +19,6 @@ const diaCurto = (iso: string) => {
   }
 }
 
-// Mede a nuvem de cada miniatura num canvas (o GIBS libera CORS). 64 px bastam para a conta.
 const medir = (url: string, sinal: { cancelado: boolean }) =>
   new Promise<number | null>((ok) => {
     const img = new Image()
@@ -37,8 +36,6 @@ const medir = (url: string, sinal: { cancelado: boolean }) =>
     img.src = url
   })
 
-// Os últimos 14 dias do lugar lado a lado, com quanto de nuvem cada um tinha, e um atalho
-// para o dia mais limpo. Mais o nascer e o pôr do Sol do dia que está no mapa.
 export function DiasLimpos({
   lugar,
   ultimo,
@@ -46,14 +43,11 @@ export function DiasLimpos({
   aoEscolher,
 }: {
   lugar: LatLng
-  /** o dia mais recente com mosaico completo */
   ultimo: string
-  /** o dia que está no mapa */
   data: string
   aoEscolher: (dia: string) => void
 }) {
   const dias = useMemo(() => Array.from({ length: DIAS }, (_, i) => somarDias(ultimo, -i)), [ultimo])
-  // arredonda o ponto para não refazer as 14 medições a cada clique vizinho
   const lat = Number(lugar.lat.toFixed(2))
   const lng = Number(lugar.lng.toFixed(2))
   const caixa = useMemo(() => caixaAoRedor({ lat, lng }, 30), [lat, lng])
@@ -63,7 +57,6 @@ export function DiasLimpos({
   useEffect(() => {
     const sinal = { cancelado: false }
     setNuvens({})
-    // três por vez: rápido sem afogar a conexão
     let proximo = 0
     const trabalhar = async () => {
       while (!sinal.cancelado && proximo < dias.length) {
@@ -118,7 +111,6 @@ export function DiasLimpos({
                     !ativo && "group-hover:ring-white/30",
                   )}
                 >
-                  {/* biome-ignore lint/performance/noImgElement: miniaturas externas do GIBS */}
                   <img src={urls[i]} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
                   {eMelhor && (
                     <span className="absolute top-0.5 right-0.5 grid size-4 place-items-center rounded-full bg-sol text-[#0e0e12]">

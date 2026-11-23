@@ -11,7 +11,6 @@ export function AvisoFontes({ className }: { className?: string }) {
   )
 }
 
-// O rodapé do site é o orbital: painel de céu, GATÉLITE gigante e adesivos.
 export function Rodape() {
   return <RodapeOrbital />
 }

@@ -1,6 +1,3 @@
-// Gera todos os arquivos da marca a partir de uma fonte única de verdade:
-// a geometria do símbolo (abaixo) e o logotipo em Anybody convertido em curvas.
-// Rodar: pnpm marca
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
@@ -19,11 +16,6 @@ export const BRANCO = "#FFFFFF"
 export const AMBAR = "#FFB547"
 export const LARANJA = "#FF5A1F"
 
-// ── Símbolo ──────────────────────────────────────────────────────────────────
-// Um gato sentado no alto de um planeta, de costas, olhando uma estrela. Linguagem de
-// ilustração geométrica: o planeta é feito de faixas paralelas recortadas no círculo,
-// o gato tem listras cortadas nas costas e o rabo termina num cacho. A estrela é o
-// único acento de cor. Caixa de 120 × 120.
 export const SIMBOLO = {
   planeta: { cx: 60, cy: 87, r: 30 },
   faixas: [59, 67.5, 76, 84.5, 93, 101.5, 110],
@@ -43,9 +35,6 @@ const simbolo = (cor, id, dx = 0, dy = 0, escala = 1) => {
   return `<defs><clipPath id="${id}p"><circle cx="${S.planeta.cx}" cy="${S.planeta.cy}" r="${S.planeta.r}"/></clipPath><mask id="${id}m" maskUnits="userSpaceOnUse" x="0" y="0" width="120" height="120"><rect width="120" height="120" fill="#fff"/><path d="${S.listras}" stroke="#000" stroke-width="2.6" stroke-linecap="round" fill="none"/></mask></defs><g transform="translate(${dx} ${dy}) scale(${escala})"><g clip-path="url(#${id}p)" fill="${cor}">${faixas}</g><g fill="${cor}" mask="url(#${id}m)"><path d="${S.corpo}"/><circle cx="${S.cabeca.cx}" cy="${S.cabeca.cy}" r="${S.cabeca.r}"/>${S.orelhas.map((o) => `<path d="${o}"/>`).join("")}</g><path d="${S.rabo}" fill="none" stroke="${cor}" stroke-width="5.2" stroke-linecap="round"/><circle cx="${S.raboPonta.cx}" cy="${S.raboPonta.cy}" r="${S.raboPonta.r}" fill="${cor}"/><path d="${S.estrela}" fill="${LARANJA}"/></g>`
 }
 
-// ── Logotipo em curvas ───────────────────────────────────────────────────────
-// Anybody em largura 150%, SemiBold: letras largas e traço uniforme (referência 04).
-// O "I" sai em laranja, a mesma cor da estrela que o gato observa.
 const arquivoFonte = readFileSync(join(raiz, "scripts/fonts/anybody-150-600.ttf"))
 const fonte = opentype.parse(arquivoFonte.buffer.slice(arquivoFonte.byteOffset, arquivoFonte.byteOffset + arquivoFonte.byteLength))
 const TEXTO = "GATÉLITE"
@@ -57,7 +46,6 @@ const caminhoDoTexto = () => {
   let x = 0
   const partes = []
   let destaque = ""
-  // glifo por glifo: o shaping do opentype.js não entende todas as tabelas da fonte
   const glifos = [...TEXTO].map((c) => fonte.charToGlyph(c))
   let y1 = Number.POSITIVE_INFINITY
   let y2 = Number.NEGATIVE_INFINITY
@@ -78,7 +66,6 @@ const caminhoDoTexto = () => {
 const texto = caminhoDoTexto()
 const alturaTexto = texto.base - texto.topo
 
-// Logo horizontal: símbolo com altura de 48 e logotipo alinhado ao centro óptico.
 const logo = (corTinta, id) => {
   const xTexto = 60
   const escala = 30 / alturaTexto
@@ -96,11 +83,9 @@ const logotipo = (corTinta) => {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${l} ${a}" width="${l * 4}" height="${a * 4}" role="img" aria-label="Gatélite"><g transform="translate(1 ${(2 - texto.topo).toFixed(2)})"><path d="${texto.d}" fill="${corTinta}"/><path d="${texto.destaque}" fill="${LARANJA}"/></g></svg>`
 }
 
-// Ícone de app: quadrado com cantos de super-elipse aproximada, fundo tinta.
 const iconeApp = (id, tamanho = 512) =>
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="${tamanho}" height="${tamanho}"><defs><radialGradient id="${id}-brilho" cx="0.85" cy="0.1" r="0.9"><stop offset="0" stop-color="${LARANJA}" stop-opacity="0.28"/><stop offset="1" stop-color="${LARANJA}" stop-opacity="0"/></radialGradient></defs><rect width="64" height="64" rx="15" fill="${TINTA}"/><rect width="64" height="64" rx="15" fill="url(#${id}-brilho)"/>${simbolo(BRANCO, id, 8, 8, 0.4)}</svg>`
 
-// Favicon: sem brilho, símbolo maior para ler em 16 px.
 const favicon = (id) =>
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="${TINTA}"/>${simbolo(BRANCO, id, 3, 3, 0.48)}</svg>`
 
@@ -113,7 +98,6 @@ saida("public/brand/gatelite-wordmark-white.svg", logotipo(BRANCO))
 saida("public/brand/gatelite-app-icon.svg", iconeApp("g"))
 saida("src/app/icon.svg", favicon("g"))
 
-// Os mesmos dados para o componente React, que desenha o logo sem depender da fonte.
 saida(
   "src/components/brand/marca-dados.ts",
   `// Gerado por scripts/gerar-marca.mjs. Não editar à mão.

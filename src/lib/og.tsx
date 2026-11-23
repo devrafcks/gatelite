@@ -4,8 +4,6 @@ import { ImageResponse } from "next/og"
 import { CORES } from "@/components/brand/marca-dados"
 import { logotipoDataUri, simboloDataUri } from "@/components/brand/simbolo-svg"
 
-// Gerador das imagens sociais (Open Graph e Twitter) de todas as páginas: céu noturno,
-// halo de atmosfera, o gato no planeta e o título na fonte da marca.
 export const TAMANHO_OG = { width: 1200, height: 630 }
 
 const fonte = (arquivo: string) => readFile(join(process.cwd(), "scripts/fonts", arquivo))
@@ -36,9 +34,7 @@ export async function imagemSocial({
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-        {/* biome-ignore lint/performance/noImgElement: imagem social gerada no servidor */}
         <img src={simboloDataUri()} width={84} height={84} alt="" />
-        {/* biome-ignore lint/performance/noImgElement: imagem social gerada no servidor */}
         <img src={logotipoDataUri().uri} height={30} width={Math.round(30 * logotipoDataUri().proporcao)} alt="" />
       </div>
       <div style={{ display: "flex", flexDirection: "column" }}>

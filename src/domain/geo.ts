@@ -9,7 +9,6 @@ export const distanciaKm = (a: LatLng, b: LatLng): number => {
   return 2 * RAIO_DA_TERRA_KM * Math.asin(Math.min(1, Math.sqrt(h)))
 }
 
-// rumo inicial de a para b, em graus a partir do norte
 export const rumo = (a: LatLng, b: LatLng): number => {
   const f1 = a.lat * GRAU
   const f2 = b.lat * GRAU
@@ -29,7 +28,6 @@ export const destino = (p: LatLng, rumoGraus: number, km: number): LatLng => {
   return { lat: f2 / GRAU, lng: ((((l2 / GRAU) + 540) % 360) - 180) }
 }
 
-// caixa em graus ao redor de um ponto, para pedir uma imagem ao WMS
 export const caixaAoRedor = (p: LatLng, raioKm: number) => {
   const dLat = raioKm / 111.32
   const dLng = raioKm / (111.32 * Math.max(0.1, Math.cos(p.lat * GRAU)))
@@ -41,7 +39,6 @@ export const caixaAoRedor = (p: LatLng, raioKm: number) => {
   }
 }
 
-// polígono da faixa de imagem: o rastro deslocado meia faixa para cada lado
 export const poligonoDaFaixa = (rastro: readonly LatLng[], larguraKm: number): LatLng[] => {
   if (rastro.length < 2 || larguraKm <= 0) return []
   const esquerda: LatLng[] = []

@@ -14,7 +14,6 @@ import { distanciaKm, type LatLng } from "./geo"
 import type { Satelite } from "./satelites"
 import { elevacaoDoSol } from "./sol"
 
-// Elementos orbitais no formato OMM (JSON da CelesTrak).
 export type ElementoOrbital = Record<string, string | number> & { NORAD_CAT_ID: number; OBJECT_NAME: string; EPOCH: string }
 
 export const criarSatrec = (e: ElementoOrbital): SatRec => json2satrec(e as never)
@@ -68,27 +67,20 @@ export const rastroEntre = (satrec: SatRec, inicio: number, fim: number, passoS 
   return pontos
 }
 
-// ── Passagens sobre um lugar ─────────────────────────────────────────────────
-// Para um satélite de imagem, "passar por cima" é o lugar cair dentro da faixa que o
-// sensor varre. Procura os instantes em que o ponto no chão sob o satélite chega mais
-// perto do lugar e mede a distância nesse instante: é o afastamento lateral da faixa.
 export type Passagem = {
   readonly id: string
   readonly norad: number
   readonly t: number
-  /** distância do lugar ao rastro no instante mais próximo */
   readonly afastamentoKm: number
   readonly dentroDaFaixa: boolean
   readonly elevacao: number
   readonly sentido: "norte" | "sul"
   readonly lado: "leste" | "oeste"
-  /** Sol acima do horizonte no lugar: um sensor óptico vê alguma coisa */
   readonly deDia: boolean
   readonly elevacaoDoSol: number
 }
 
 const refinarMinimo = (f: (t: number) => number, a: number, b: number) => {
-  // seção áurea: a distância perto do mínimo é uma curva suave
   const r = (Math.sqrt(5) - 1) / 2
   let x1 = b - r * (b - a)
   let x2 = a + r * (b - a)
@@ -118,8 +110,6 @@ export const passagensSobre = (
   lugar: LatLng,
   inicio: number,
   fim: number,
-  // passo grosso + refinamento por seção áurea: a distância perto do mínimo é suave,
-  // então 45 s não perdem nenhuma passagem e custam menos da metade dos cálculos
   { passoS = 45, alcanceKm }: { passoS?: number; alcanceKm?: number } = {},
 ): Passagem[] => {
   const limite = alcanceKm ?? Math.max(900, sat.faixaKm * 0.9)
@@ -142,7 +132,6 @@ export const passagensSobre = (
         const agora = posicaoEm(satrec, new Date(tMin))
         const v = visadaDe(satrec, lugar, new Date(tMin))
         const sol = elevacaoDoSol(new Date(tMin), lugar.lat, lugar.lng)
-        // no instante mais próximo, o rastro corre quase norte-sul: o lado é a longitude
         const dLng = agora ? ((agora.lng - lugar.lng + 540) % 360) - 180 : 0
         const lado: "leste" | "oeste" = dLng >= 0 ? "leste" : "oeste"
         passagens.push({
@@ -165,8 +154,6 @@ export const passagensSobre = (
   return passagens
 }
 
-// Passagens visíveis a olho nu (para a ISS): acima de 10°, céu escuro no lugar e a
-// estação iluminada. Aqui só checa céu escuro e altura; o brilho vem do Sol no satélite.
 export const passagensVisiveis = (satrec: SatRec, lugar: LatLng, inicio: number, fim: number, passoS = 20) => {
   const resultado: { inicio: number; fim: number; pico: number; elevacaoMax: number }[] = []
   let atual: { inicio: number; fim: number; pico: number; elevacaoMax: number } | null = null

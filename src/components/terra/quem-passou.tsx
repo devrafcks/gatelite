@@ -18,8 +18,6 @@ const CIDADES = [
   { nome: "Porto Alegre", lat: -30.035, lng: -51.218 },
 ]
 
-// Prova na primeira dobra: os satélites que realmente cobriram uma cidade nas últimas
-// 24 h, calculados agora a partir das órbitas do dia.
 export function QuemPassou() {
   const [lugar, setLugar] = useState<{ nome: string; lat: number; lng: number }>(CIDADES[0]!)
   const [agora, setAgora] = useState<number | null>(null)
@@ -28,7 +26,6 @@ export function QuemPassou() {
   const cobertas = agora ? passagens.filter((p) => p.dentroDaFaixa) : []
   const fuso = fusoPelaLongitude(lugar.lng)
 
-  // linha de 24 h: cada hora, quantos satélites cobriam o lugar
   const horas = Array.from({ length: 24 }, (_, i) => {
     const t0 = (agora ?? 0) - (24 - i) * 3_600_000
     const n = cobertas.filter((p) => p.t >= t0 && p.t < t0 + 3_600_000).length

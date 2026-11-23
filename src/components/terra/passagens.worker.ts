@@ -1,6 +1,4 @@
 /// <reference lib="webworker" />
-// Calcula as passagens fora da thread principal: são dezenas de milhares de propagações
-// SGP4 por lugar, e o mapa não pode engasgar enquanto isso acontece.
 import type { LatLng } from "@/domain/geo"
 import { criarSatrec, type ElementoOrbital, passagensSobre } from "@/domain/orbitas"
 import { SATELITES } from "@/domain/satelites"
@@ -18,7 +16,6 @@ let chaveElementos = ""
 
 self.onmessage = (e: MessageEvent<PedidoDePassagens>) => {
   const { id, elementos, lugar, inicio, fim } = e.data
-  // os satrecs só são refeitos quando os elementos mudam
   const chave = elementos.map((x) => `${x.NORAD_CAT_ID}:${x.EPOCH}`).join("|")
   if (chave !== chaveElementos) {
     satrecs.clear()

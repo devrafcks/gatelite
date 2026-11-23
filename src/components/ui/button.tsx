@@ -5,8 +5,6 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "cn"
 import { useMagnetico } from "@/lib/magnetico"
 
-// Botões com brilho contido (sem halo colorido) e cantos de 10 px. Todos são magnéticos:
-// com o mouse por perto, o botão se inclina na direção do cursor.
 const buttonVariants = cva(
   "group/button inline-flex shrink-0 items-center justify-center rounded-xl border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap outline-none select-none transition-[background-color,border-color,color,box-shadow,opacity] focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/40 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {

@@ -6,7 +6,6 @@ import { ID_CAMADAS } from "@/domain/gibs"
 export const ABAS = ["imagem", "satelites", "tempo", "eventos"] as const
 export type Aba = (typeof ABAS)[number]
 
-// A visão inteira mora na URL: copiar o endereço é compartilhar exatamente o que se vê.
 export const useEstadoExplorar = () =>
   useQueryStates(
     {

@@ -1,4 +1,3 @@
-/* ── Hero orbital: tudo é função de --p (progresso da rolagem, 0 a 1) ───────── */
 .hero-orbital {
   --p: 0;
   --titulo: 1;
@@ -32,7 +31,6 @@
   top: 50%;
   left: 50%;
   width: min(36rem, 46vw);
-  /* desktop: começa à direita e vem para o centro, crescendo */
   transform: translate(calc(-50% + (1 - var(--aproxima)) * 24vw), calc(-46% + var(--aproxima) * -4%))
     scale(calc(0.92 + var(--aproxima) * 0.42));
   will-change: transform;
@@ -94,7 +92,6 @@
   50% { transform: translateY(5px); opacity: 1; }
 }
 
-/* celular: a Terra fica embaixo do título e só cresce */
 @media (max-width: 1023px) {
   .hero-orbital__titulo {
     align-self: start;

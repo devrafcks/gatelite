@@ -1,5 +1,3 @@
-// Tudo que identifica o produto mora aqui. Trocar o nome é trocar este arquivo
-// (e rodar `pnpm marca` para regerar os SVGs).
 export const MARCA = {
   nome: "Gatélite",
   slogan: "A Terra de hoje, vista de cima.",

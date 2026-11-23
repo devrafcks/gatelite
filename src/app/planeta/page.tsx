@@ -17,10 +17,6 @@ export const metadata: Metadata = {
     "O planeta agora: o lado do dia e o da noite com as luzes das cidades, os satélites e os eventos ativos. Mais as fotos da EPIC, as estações numa cortina e a foto do dia.",
 }
 
-// as estações: o mesmo planeta no solstício de junho e no de dezembro
-// VIIRS no lugar do MODIS: sem os vãos pretos entre as órbitas. O recorte (50° S a 55° N)
-// fica fora da noite polar dos dois solstícios: em dezembro o norte alto não tem Sol e em
-// junho o sul alto também, e esses trechos saíam como faixas pretas tortas.
 const MUNDO = { sul: -50, norte: 55, oeste: -180, leste: 180 }
 const JUNHO = urlDaImagem("VIIRS_NOAA20_CorrectedReflectance_TrueColor", "2025-06-21", MUNDO, 1440, 420)
 const DEZEMBRO = urlDaImagem("VIIRS_NOAA20_CorrectedReflectance_TrueColor", "2025-12-21", MUNDO, 1440, 420)

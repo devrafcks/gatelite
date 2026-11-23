@@ -1,8 +1,6 @@
 import { useId } from "react"
 import type { Satelite } from "@/domain/satelites"
 
-// Um satélite em "foto de produto": corpo em perspectiva com manta térmica, painel solar
-// com células e um brilho de estúdio por trás. A cor da manta muda com a família.
 const MANTAS: Record<Satelite["familia"], [string, string, string]> = {
   "alta-resolucao": ["#f6d27a", "#c8902e", "#7a4f12"],
   "nasa-diaria": ["#e9edf3", "#a9b3c2", "#5d6878"],
@@ -46,7 +44,6 @@ export function IlustracaoSatelite({ familia, className }: { familia: Satelite["
 
       <ellipse cx="180" cy="110" rx="150" ry="100" fill={`url(#${id}brilho)`} />
 
-      {/* painel solar em perspectiva */}
       <polygon points="10,128 150,96 152,128 14,168" fill={`url(#${id}painel)`} />
       {Array.from({ length: 6 }, (_, i) => {
         const t = (i + 1) / 7
@@ -67,22 +64,18 @@ export function IlustracaoSatelite({ familia, className }: { familia: Satelite["
       <polygon points="10,128 150,96 152,128 14,168" fill={`url(#${id}reflexo)`} />
       <rect x="148" y="106" width="20" height="5" rx="2" fill="#9aa3b2" transform="rotate(-12 158 108)" />
 
-      {/* corpo: topo, frente e lado */}
       <polygon points="166,62 222,52 254,72 198,82" fill={`url(#${id}topo)`} />
       <polygon points="166,62 198,82 198,152 166,134" fill={`url(#${id}frente)`} />
       <polygon points="198,82 254,72 254,136 198,152" fill={`url(#${id}lado)`} />
-      {/* rugas da manta térmica */}
       <path d="M172 80L192 92M170 102L194 116M172 122L192 134" stroke={claro} strokeOpacity="0.35" strokeWidth="1.5" />
       <path d="M206 96L246 88M206 120L246 110" stroke={claro} strokeOpacity="0.18" strokeWidth="1.5" />
 
-      {/* instrumento e antena */}
       <rect x="212" y="138" width="22" height="16" rx="3" fill="#20242e" />
       <ellipse cx="223" cy="154" rx="11" ry="4" fill="#0b0d12" />
       <ellipse cx="223" cy="153" rx="5" ry="2" fill="#ff5a1f" opacity="0.85" />
       <line x1="236" y1="64" x2="246" y2="40" stroke="#c9ccd3" strokeWidth="2" />
       <ellipse cx="248" cy="36" rx="12" ry="5" fill="#e9edf3" transform="rotate(-20 248 36)" />
 
-      {/* sombra no "chão" do estúdio */}
       <ellipse cx="190" cy="198" rx="90" ry="8" fill="#000" opacity="0.35" />
     </svg>
   )

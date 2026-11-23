@@ -23,20 +23,15 @@ const haQuanto = (t: number, agora: number) => {
   return meses === 1 ? "salvo há 1 mês" : `salvo há ${meses} meses`
 }
 
-// Os lugares salvos no aparelho. Cada cartão é a foto do lugar: o mosaico detalhado de
-// perto e, passando o mouse, a foto do dia da NASA, de mais longe. Embaixo, o nome,
-// o nascer e o pôr do Sol de hoje.
 export function ListaDeLugares() {
   const lugares = useLugaresSalvos((s) => s.lugares)
   const remover = useLugaresSalvos((s) => s.remover)
   const salvar = useLugaresSalvos((s) => s.salvar)
-  // a lista vem do localStorage: só existe no navegador
   const montado = useSyncExternalStore(
     () => () => {},
     () => true,
     () => false,
   )
-  // o relógio só é lido no navegador, depois de montar (nunca no prerender)
   const agora = useMemo(() => (montado ? new Date() : null), [montado])
 
   if (!montado || !agora) {
@@ -125,7 +120,6 @@ function Cartao({
       style={{ animationDelay: `${Math.min(indice, 8) * 60}ms` }}
     >
       <Link href={linkDe(l)} className="absolute inset-0 outline-none focus-visible:ring-2 focus-visible:ring-sol" aria-label={`Abrir ${l.nome} no explorador`}>
-        {/* biome-ignore lint/performance/noImgElement: imagem externa do GIBS */}
         <img
           src={perto}
           alt=""
@@ -133,8 +127,6 @@ function Cartao({
           decoding="async"
           className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover/cartao:scale-105"
         />
-        {/* a foto do dia (NASA): aparece por cima ao passar o mouse, de mais longe */}
-        {/* biome-ignore lint/performance/noImgElement: imagem externa do GIBS */}
         <img
           src={diaria}
           alt=""

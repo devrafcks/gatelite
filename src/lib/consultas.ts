@@ -17,7 +17,6 @@ const pegar = async <T>(url: string, signal?: AbortSignal): Promise<T> => {
 export const useElementos = () =>
   useQuery({ queryKey: ["elementos"], queryFn: () => pegar<Elementos>("/api/elementos"), staleTime: 2 * 3_600_000 })
 
-// satélites prontos para propagar: catálogo + elementos + satrec
 export const useFrota = () => {
   const q = useElementos()
   const frota = useMemo(() => {
@@ -48,9 +47,6 @@ export const useApod = () =>
 
 const chaveDaBusca = (q: string) => q.trim().replace(/\s+/g, " ").toLowerCase()
 
-// Busca de lugares: a consulta é normalizada (mais acerto de cache), a requisição antiga
-// é cancelada quando a pessoa continua digitando, e o último resultado fica na tela
-// enquanto o novo chega, sem piscar.
 export const useLugares = (q: string) => {
   const chave = chaveDaBusca(q)
   return useQuery({
@@ -68,7 +64,6 @@ export type { Apod, Elementos, Eventos, Lugar }
 
 type RespostaReversa = { features?: { properties?: Record<string, string | undefined> }[] }
 
-// nome de um ponto tocado no mapa (Photon, reverso): "Pinheiros, São Paulo"
 export const useNomeDoPonto = (ponto: { lat: number; lng: number } | null) => {
   const lat = ponto ? ponto.lat.toFixed(3) : null
   const lng = ponto ? ponto.lng.toFixed(3) : null

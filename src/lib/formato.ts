@@ -14,7 +14,6 @@ export const reais = (v: number, casas = 2) =>
     maximumFractionDigits: casas,
   }).format(v)
 
-// energia com a unidade que deixa o número legível
 export const energia = (kwh: number) => {
   if (kwh >= 1_000_000) return { valor: numero(kwh / 1_000_000, 2), unidade: "GWh" }
   if (kwh >= 1000) return { valor: numero(kwh / 1000, 1), unidade: "MWh" }

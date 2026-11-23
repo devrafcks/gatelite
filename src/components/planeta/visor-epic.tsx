@@ -7,7 +7,6 @@ import { useDatasEpic, useEpic } from "@/lib/consultas"
 import { dataCurta } from "@/lib/formato"
 import { cn } from "@/lib/utils"
 
-// As fotos do planeta inteiro, dia a dia. A EPIC publica com 1 a 3 dias de atraso.
 export function VisorEpic() {
   const datas = useDatasEpic()
   const [escolhida, setEscolhida] = useState<string | undefined>(undefined)

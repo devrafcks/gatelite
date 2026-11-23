@@ -72,7 +72,6 @@ export function Cabecalho({ sobreposto = false }: { sobreposto?: boolean }) {
   )
 }
 
-// No celular, a navegação desce para uma barra preta com o item ativo em pílula branca.
 export function NavegacaoMovel() {
   const caminho = usePathname()
   if (caminho.startsWith("/explorar")) return null

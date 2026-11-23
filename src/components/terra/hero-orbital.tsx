@@ -6,14 +6,8 @@ import { imagemOtimizada, preCarregar } from "@/lib/imagens"
 import { numero } from "@/lib/formato"
 import { cn } from "@/lib/utils"
 
-// O hero que gira com a rolagem. A seção é alta e o palco fica preso (sticky): rolar
-// não move a página por baixo, gira a Terra pelas fotos do dia, aproxima o planeta e
-// troca a manchete pelo desfecho. Nada trava a rolagem: acabou a seção, a página segue.
-// Com movimento reduzido, vira um hero parado.
-
 const limitar = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v))
 const suave = (t: number) => t * t * (3 - 2 * t)
-// a Terra ocupa metade da largura no desktop e quase tudo no celular
 const TAMANHOS = "(min-width: 1024px) 50vw, 92vw"
 
 export function HeroOrbital({
@@ -37,7 +31,6 @@ export function HeroOrbital({
 
   useEffect(() => setReduzido(window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false), [])
 
-  // a primeira foto vem na hora; as outras, uma de cada vez, sem disputar a banda com a página
   useEffect(() => {
     let cancelado = false
     const carregar = async () => {
@@ -69,14 +62,12 @@ export function HeroOrbital({
       const r = el.getBoundingClientRect()
       const curso = Math.max(1, r.height - window.innerHeight)
       alvo = limitar(-r.top / curso)
-      // o laço só roda enquanto há movimento: parado, não gasta nada
       if (!raf) raf = requestAnimationFrame(pintar)
     }
     const pintar = () => {
       mostrado += (alvo - mostrado) * 0.14
       if (Math.abs(alvo - mostrado) < 0.0005) mostrado = alvo
       const prog = mostrado
-      // o filme ocupa 85% do curso; o resto é pouso, com o desfecho no ar
       const filme = limitar(prog / 0.85)
       const titulo = 1 - limitar(filme / 0.32)
       const fim = suave(limitar((filme - 0.72) / 0.28))
@@ -86,7 +77,6 @@ export function HeroOrbital({
       p.style.setProperty("--fim", fim.toFixed(3))
       p.style.setProperty("--aproxima", aproxima.toFixed(3))
       p.style.setProperty("--dica", prog > 0.015 ? "0" : "1")
-      // o que sumiu não pode ser clicado
       p.dataset.saiu = titulo < 0.1 ? "sim" : "nao"
       p.dataset.chegou = fim > 0.6 ? "sim" : "nao"
       const q = Math.min(n - 1, Math.floor(filme * n))
@@ -118,17 +108,13 @@ export function HeroOrbital({
           <div className="hero-orbital__titulo relative z-10 lg:col-span-6">{titulo}</div>
         </div>
 
-        {/* a Terra: começa à direita, vem para o centro e cresce */}
         <div className="hero-orbital__terra" aria-hidden={false}>
           <div className="relative aspect-square w-full overflow-hidden rounded-full">
             {fotos.map((f, i) => {
-              // no DOM só a foto da vez e as vizinhas (já baixadas): 13 fotos decodificadas
-              // ao mesmo tempo pesavam dezenas de MB de memória de vídeo
               const visivel = prontas.has(quadro) ? quadro : 0
               if (i !== 0 && (!prontas.has(i) || Math.abs(i - visivel) > 1)) return null
               const a = atributos[i]
               return (
-                // biome-ignore lint/performance/noImgElement: imagens externas da NASA, já otimizadas
                 <img
                   key={f.id}
                   src={a?.src}
@@ -136,7 +122,6 @@ export function HeroOrbital({
                   sizes={a?.sizes}
                   alt={i === quadro ? `A Terra fotografada pela câmera EPIC às ${f.data.slice(11, 16)} UTC de ${f.data.slice(0, 10)}` : ""}
                   className={cn(
-                    // troca seca, quadro a quadro: é um scrub, não um slideshow
                     "absolute inset-0 h-full w-full scale-[1.2] object-cover",
                     i === visivel ? "opacity-100" : "opacity-0",
                   )}

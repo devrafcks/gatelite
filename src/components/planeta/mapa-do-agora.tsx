@@ -13,9 +13,6 @@ import { coordenada, numero } from "@/lib/formato"
 import { useImagemSemPreto } from "@/lib/sem-preto"
 import { cn } from "@/lib/utils"
 
-// O planeta agora, num mapa-múndi: o mosaico de ontem da NASA de dia, as luzes das cidades
-// onde já é noite, a linha que separa os dois andando de verdade, o ponto onde o Sol está
-// a pino, os satélites e os eventos ativos.
 const L = 1440
 const A = 720
 const MUNDO = { sul: -90, norte: 90, oeste: -180, leste: 180 }
@@ -35,10 +32,7 @@ export function MapaDoAgora() {
     return () => clearInterval(id)
   }, [])
 
-  // o último dia com o mosaico completo (o de ontem ainda tem as Américas faltando de madrugada)
   const ontem = agora ? dataCompleta(agora) : null
-  // VIIRS (NOAA-20): faixa de 3 mil km, sem os vãos pretos entre as órbitas do MODIS.
-  // O Blue Marble por baixo cobre só a noite polar, onde não há imagem.
   const base = urlDaImagem("BlueMarble_NextGeneration", "2004-08-01", MUNDO, 1440, 720)
   const dia = useImagemSemPreto(ontem ? urlDaImagem("VIIRS_NOAA20_CorrectedReflectance_TrueColor", ontem, MUNDO, 1200, 600, "png") : null)
   const luzes = urlDaImagem("VIIRS_Black_Marble", "2016-01-01", MUNDO, 1440, 720)
@@ -57,7 +51,6 @@ export function MapaDoAgora() {
     : []
   const listaEventos = eventos.data?.eventos ?? []
 
-  // rótulo só para quem não cai em cima de outro já escrito (ordem: o mais ao norte primeiro)
   const comRotulo = new Set<number>()
   const ocupados: { x: number; y: number; w: number }[] = []
   for (const p of [...posicoes].sort((a, b) => b.lat - a.lat)) {
@@ -87,21 +80,17 @@ export function MapaDoAgora() {
           <rect width={L} height={A} fill="#0c1124" />
           <image href={base} width={L} height={A} preserveAspectRatio="none" opacity="0.7" />
           {dia && <image href={dia} width={L} height={A} preserveAspectRatio="none" />}
-          {/* a noite: escurece o dia e acende as cidades, com a borda do crepúsculo macia */}
           <g mask="url(#mascara-noite)">
             <rect width={L} height={A} fill="#020308" opacity="0.82" />
             <image href={luzes} width={L} height={A} preserveAspectRatio="none" style={{ mixBlendMode: "screen" }} />
           </g>
           <path d={noiteFunda} fill="#020308" opacity="0.18" filter="url(#borda-macia)" />
 
-          {/* grade leve: equador e trópicos */}
           {[0, 23.44, -23.44].map((lat) => (
             <line key={lat} x1="0" x2={L} y1={y(lat)} y2={y(lat)} stroke="#fff" strokeOpacity={lat === 0 ? 0.18 : 0.08} strokeDasharray="4 8" />
           ))}
         </svg>
 
-        {/* camada viva por cima, num svg à parte: os satélites andam a cada 5 s sem obrigar o
-            navegador a redesenhar as imagens e a máscara desfocada da noite que estão embaixo */}
         <svg viewBox={`0 0 ${L} ${A}`} className="absolute inset-0 block h-full w-full [contain:strict]" aria-hidden>
           {(camada === "tudo" || camada === "eventos") &&
             listaEventos.map((e) => (
@@ -193,7 +182,6 @@ export function MapaDoAgora() {
   )
 }
 
-// cosseno do ângulo entre um ponto e o ponto subsolar: positivo = lado do dia
 const cosAngulo = (a: { lat: number; lng: number }, b: { lat: number; lng: number }) => {
   const r = Math.PI / 180
   return (

@@ -1,8 +1,6 @@
 import { useId } from "react"
 import { DesenhoDoSimbolo } from "@/components/brand/logo"
 
-// Adesivos recortados, na mesma linguagem do símbolo: formas geométricas chapadas,
-// faixas paralelas, quatro cores (papel, tinta, laranja, azul) e o recorte branco fino.
 export type TipoAdesivo = "selo" | "satelite" | "planeta" | "cometa" | "lua" | "simbolo" | "pino"
 
 export const ROTULOS_ADESIVO: Record<TipoAdesivo, string> = {
@@ -39,7 +37,6 @@ const desenho = (tipo: TipoAdesivo, id: string): { silhueta: React.ReactNode; ar
               fill={PAPEL}
               style={{ fontStretch: "125%" }}
             >
-              {/* comprimento fixo = a volta inteira do círculo (2π·38), sem sobrar nem sobrepor */}
               <textPath href={`#${id}t`} textLength="236" lengthAdjust="spacingAndGlyphs">
                 OLHA PRA CIMA · OLHA PRA CIMA ·
               </textPath>
@@ -97,7 +94,6 @@ const desenho = (tipo: TipoAdesivo, id: string): { silhueta: React.ReactNode; ar
                 <rect key={y} x="18" y={y} width="84" height="5" rx="2.5" />
               ))}
             </g>
-            {/* a metade da frente do anel passa por cima */}
             <path d="M7.6 75.1A54 12 -14 0 0 112.4 48.9" fill="none" stroke={SOL} strokeWidth="5" strokeLinecap="round" />
           </>
         ),
@@ -178,7 +174,6 @@ export function Adesivo({ tipo }: { tipo: TipoAdesivo }) {
           <stop offset=".65" stopColor="#fff" stopOpacity="0" />
         </linearGradient>
       </defs>
-      {/* o recorte: a silhueta engordada em papel */}
       <g fill={PAPEL} stroke={PAPEL} strokeWidth="9" strokeLinejoin="round">
         {silhueta}
       </g>

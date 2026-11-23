@@ -12,7 +12,6 @@ import { urlDaImagem } from "@/domain/gibs"
 import { FAMILIAS, SATELITES } from "@/domain/satelites"
 import { numero } from "@/lib/formato"
 
-// Novo Progresso (PA), na BR-163: mesmo mês, 22 anos de distância.
 const CAIXA_NOVO_PROGRESSO = { sul: -7.6, norte: -6.4, oeste: -56.2, leste: -54.4 }
 const ANTES = urlDaImagem("MODIS_Terra_CorrectedReflectance_TrueColor", "2002-07-10", CAIXA_NOVO_PROGRESSO, 960, 640)
 const DEPOIS = urlDaImagem("MODIS_Terra_CorrectedReflectance_TrueColor", "2024-07-18", CAIXA_NOVO_PROGRESSO, 960, 640)
@@ -22,13 +21,11 @@ const familias = (Object.keys(FAMILIAS) as (keyof typeof FAMILIAS)[]).filter((f)
 export default function Inicio() {
   return (
     <div className="bg-background text-foreground">
-      {/* ── Primeiro viewport: a Terra de hoje, girando com a rolagem ── */}
       <Suspense fallback={<HeroEstatico />}>
         <HeroDaTerra />
       </Suspense>
 
       <main>
-        {/* ── Quem passou por cima ── */}
         <section className="revelar mx-auto grid max-w-7xl gap-12 px-4 py-24 md:px-6 lg:grid-cols-12">
           <div className="lg:col-span-5">
             <h2 className="titulo-display text-[clamp(2rem,4vw,3.3rem)] font-light">
@@ -48,7 +45,6 @@ export default function Inicio() {
           </div>
         </section>
 
-        {/* ── A frota ── */}
         <section className="estrelas faixa text-white">
           <div className="mx-auto max-w-7xl px-4 py-24 md:px-6">
             <div className="grid items-center gap-8 lg:grid-cols-12">
@@ -93,7 +89,6 @@ export default function Inicio() {
           </div>
         </section>
 
-        {/* ── Antes e depois ── */}
         <section className="revelar mx-auto grid max-w-7xl gap-12 px-4 py-24 md:px-6 lg:grid-cols-12">
           <div className="order-2 lg:order-1 lg:col-span-7">
             <Cortina antes={ANTES} depois={DEPOIS} rotuloAntes="Jul 2002" rotuloDepois="Jul 2024" />
@@ -115,7 +110,6 @@ export default function Inicio() {
           </div>
         </section>
 
-        {/* ── O planeta agora ── */}
         <section className="revelar mx-auto max-w-7xl px-4 pb-24 md:px-6">
           <div className="mb-10 grid gap-6 lg:grid-cols-12">
             <h2 className="titulo-display text-[clamp(2rem,4vw,3.3rem)] font-light lg:col-span-6">
@@ -131,7 +125,6 @@ export default function Inicio() {
           </Suspense>
         </section>
 
-        {/* ── Fechamento ── */}
         <section className="revelar mx-auto max-w-7xl px-4 md:px-6">
           <div className="estrelas faixa relative overflow-hidden rounded-3xl border px-6 py-16 text-white sm:px-14 sm:py-20">
             <div className="gradiente-sol absolute -top-40 -right-24 size-[26rem] rounded-full opacity-35 blur-3xl" aria-hidden />

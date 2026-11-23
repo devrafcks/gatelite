@@ -1,5 +1,3 @@
-// EPIC: a câmera do satélite DSCOVR, parado entre a Terra e o Sol a 1,5 milhão de km.
-// Vê sempre o lado iluminado do planeta inteiro.
 export type FotoEpic = {
   readonly id: string
   readonly imagem: string

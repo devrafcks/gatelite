@@ -1,6 +1,3 @@
-// Gera os pontos dos continentes do globo pontilhado uma vez, no build, em vez de
-// calcular no navegador (milhares de testes de ponto-no-polígono travavam a página).
-// Rodar: pnpm pontos
 import { readFileSync, writeFileSync } from "node:fs"
 import { geoBounds, geoContains } from "d3-geo"
 import { feature } from "topojson-client"

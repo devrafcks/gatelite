@@ -5,8 +5,6 @@ import { cn } from "@/lib/utils"
 
 export type Listra = { readonly valor: number; readonly rotulo?: string; readonly destaque?: boolean; readonly apagada?: boolean }
 
-// O gráfico-assinatura: linhas verticais finas, a altura é o valor e a cor corre do âmbar
-// ao rosa. Herdado das referências 02 e 03, com as cores do pôr do sol.
 export function GraficoDeListras({
   dados,
   altura = 96,

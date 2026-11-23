@@ -9,7 +9,6 @@ const GloboPontilhado = dynamic(() => import("@/components/terra/globo-pontilhad
   loading: () => <div className="aspect-square w-full animate-pulse rounded-full bg-white/[0.03]" />,
 })
 
-// a frota ao vivo no globo pontilhado; tocar num satélite abre a página dele
 export function GloboDaLanding() {
   const { frota } = useFrota()
   const router = useRouter()

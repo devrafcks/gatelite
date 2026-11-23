@@ -4,19 +4,12 @@ import dynamic from "next/dynamic"
 import { useEffect, useState } from "react"
 import { Logotipo, Simbolo } from "@/components/brand/logo"
 
-// A abertura: só na primeira visita ao site, um amanhecer orbital de ~2 s cobre a página
-// enquanto ela termina de carregar. Quem volta não vê de novo: um script no começo do
-// <body> lê a marca no aparelho e esconde a abertura antes da primeira pintura.
-// Tudo em CSS (transform e opacity): nada de biblioteca de animação no pacote do site.
-
-// o player do gato (com WASM) só baixa quando a abertura vai aparecer de fato
 const DotLottieReact = dynamic(() => import("@lottiefiles/dotlottie-react").then((m) => m.DotLottieReact), {
   ssr: false,
   loading: () => null,
 })
 
 export const CHAVE_ABERTURA = "gatelite-abertura"
-// roda antes de pintar: marca o <html> para o CSS esconder a abertura de quem já viu
 export const SCRIPT_ABERTURA = `try{if(localStorage.getItem("${CHAVE_ABERTURA}"))document.documentElement.dataset.abertura="vista"}catch(e){}`
 
 const DURACAO_MS = 2200
@@ -35,7 +28,6 @@ export function Abertura() {
   useEffect(() => {
     const html = document.documentElement
     const jaViu = html.dataset.abertura === "vista"
-    // aba aberta em segundo plano também não precisa: quando a pessoa chegar, já está pronta
     if (jaViu || document.visibilityState === "hidden") {
       setFase("fora")
       return
@@ -43,7 +35,6 @@ export function Abertura() {
     try {
       localStorage.setItem(CHAVE_ABERTURA, "1")
     } catch {
-      // sem armazenamento (aba anônima bloqueada): mostra só desta vez
     }
     setGato(true)
     const reduzido = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false
@@ -61,14 +52,12 @@ export function Abertura() {
       html.style.overflow = ""
       saida = setTimeout(() => setFase("fora"), reduzido ? 300 : SAIDA_MS)
     }
-    // só sai quando o tempo mínimo passou E a página terminou de carregar
     const pronto = new Promise<void>((ok) => {
       if (document.readyState === "complete") ok()
       else window.addEventListener("load", () => ok(), { once: true })
     })
     const minimo = new Promise<void>((ok) => setTimeout(ok, total))
     Promise.all([pronto, minimo]).then(sair)
-    // trava de segurança: nunca prende ninguém mais que 5 s
     const limite = setTimeout(sair, 5000)
     return () => {
       cancelado = true
@@ -89,7 +78,6 @@ export function Abertura() {
       data-fase={fase}
       className="abertura fixed inset-0 z-[100] flex flex-col items-center justify-center overflow-hidden bg-[#08090d] text-white"
     >
-      {/* o horizonte da Terra visto da órbita: noite no topo, a linha do Sol embaixo */}
       <div className="abertura__ceu absolute inset-0" aria-hidden />
       <div className="estrelas pointer-events-none absolute inset-0 opacity-60" aria-hidden />
 

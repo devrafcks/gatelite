@@ -186,7 +186,6 @@ export function AbaSatelites({
   )
 }
 
-// "há 3 h", "em 40 min": mais fácil de ler que só a hora
 const relativo = (t: number, agora: number) => {
   const min = Math.round((t - agora) / 60_000)
   const abs = Math.abs(min)

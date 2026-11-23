@@ -2,7 +2,6 @@
 
 import dynamic from "next/dynamic"
 
-// O explorador vive no navegador: mapa WebGL, órbitas calculadas aqui e a URL como estado.
 const Explorador = dynamic(() => import("./explorador").then((m) => m.Explorador), {
   ssr: false,
   loading: () => <TelaDeCarregamento />,
