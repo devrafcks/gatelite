@@ -161,8 +161,65 @@ export const urlDosBlocos = (gibsId: string, c: Camada, data: string) =>
 
 export type Caixa = { sul: number; norte: number; oeste: number; leste: number }
 
-export const urlDaImagem = (gibsId: string, data: string, caixa: Caixa, largura = 720, altura = 480, formato: "jpg" | "png" = "jpg") =>
+export const urlWms = (gibsId: string, data: string, caixa: Caixa, largura = 720, altura = 480, formato: "jpg" | "png" = "jpg") =>
   `${BASE}/wms/epsg4326/best/wms.cgi?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=${gibsId}&CRS=EPSG:4326&BBOX=${caixa.sul},${caixa.oeste},${caixa.norte},${caixa.leste}&WIDTH=${largura}&HEIGHT=${altura}&FORMAT=image/${formato === "jpg" ? "jpeg" : "png"}${formato === "png" ? "&TRANSPARENT=TRUE" : ""}&TIME=${data}`
+
+const arred = (v: number) => Number(v.toFixed(4))
+
+export const urlDaImagem = (gibsId: string, data: string, caixa: Caixa, largura = 720, altura = 480, formato: "jpg" | "png" = "jpg") =>
+  `/api/gibs?camada=${gibsId}&data=${data}&caixa=${arred(caixa.sul)},${arred(caixa.oeste)},${arred(caixa.norte)},${arred(caixa.leste)}&l=${Math.round(largura)}&a=${Math.round(altura)}&f=${formato}`
+
+type Matriz = { readonly nome: string; readonly niveis: number; readonly ext: "jpg" | "png" }
+const M250: Matriz = { nome: "250m", niveis: 9, ext: "jpg" }
+export const MATRIZES: Record<string, Matriz> = {
+  MODIS_Terra_CorrectedReflectance_TrueColor: M250,
+  MODIS_Aqua_CorrectedReflectance_TrueColor: M250,
+  VIIRS_NOAA20_CorrectedReflectance_TrueColor: M250,
+  VIIRS_NOAA21_CorrectedReflectance_TrueColor: M250,
+  VIIRS_SNPP_CorrectedReflectance_TrueColor: M250,
+  MODIS_Terra_CorrectedReflectance_Bands721: M250,
+  BlueMarble_NextGeneration: { nome: "500m", niveis: 8, ext: "jpg" },
+  VIIRS_Black_Marble: { nome: "500m", niveis: 8, ext: "png" },
+  MODIS_Terra_Land_Surface_Temp_Day: { nome: "1km", niveis: 7, ext: "png" },
+  MODIS_Terra_Aerosol: { nome: "2km", niveis: 6, ext: "png" },
+  HLS_S30_Nadir_BRDF_Adjusted_Reflectance: { nome: "31.25m", niveis: 12, ext: "png" },
+  HLS_L30_Nadir_BRDF_Adjusted_Reflectance: { nome: "31.25m", niveis: 12, ext: "png" },
+}
+
+export const urlDoBloco4326 = (gibsId: string, data: string, nivel: number, linha: number, coluna: number) => {
+  const m = MATRIZES[gibsId]
+  if (!m) throw new Error(`camada desconhecida: ${gibsId}`)
+  return `${BASE}/wmts/epsg4326/best/${gibsId}/default/${data}/${m.nome}/${nivel}/${linha}/${coluna}.${m.ext}`
+}
+
+export const blocosDaCaixa = (gibsId: string, caixa: Caixa, largura: number) => {
+  const m = MATRIZES[gibsId]
+  if (!m) throw new Error(`camada desconhecida: ${gibsId}`)
+  const grausPorPixelPedido = (caixa.leste - caixa.oeste) / largura
+  let nivel = 0
+  while (nivel < m.niveis - 1 && 0.5625 / 2 ** nivel > grausPorPixelPedido) nivel++
+  const graus = 288 / 2 ** nivel
+  const colunas = Math.ceil(360 / graus)
+  const linhas = Math.ceil(180 / graus)
+  const c0 = Math.max(0, Math.floor((caixa.oeste + 180) / graus))
+  const c1 = Math.min(colunas - 1, Math.floor((caixa.leste + 180 - 1e-9) / graus))
+  const l0 = Math.max(0, Math.floor((90 - caixa.norte) / graus))
+  const l1 = Math.min(linhas - 1, Math.floor((90 - caixa.sul - 1e-9) / graus))
+  const grausPorPixel = graus / 512
+  return {
+    nivel,
+    c0,
+    c1,
+    l0,
+    l1,
+    recorte: {
+      esquerda: Math.round((caixa.oeste + 180 - c0 * graus) / grausPorPixel),
+      topo: Math.round((90 - caixa.norte - l0 * graus) / grausPorPixel),
+      largura: Math.max(1, Math.round((caixa.leste - caixa.oeste) / grausPorPixel)),
+      altura: Math.max(1, Math.round((caixa.norte - caixa.sul) / grausPorPixel)),
+    },
+  }
+}
 
 export const dataPadrao = (hojeUtc: string) => somarDias(hojeUtc, -1)
 

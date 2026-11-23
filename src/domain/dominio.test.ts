@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { diaMaisLimpo, fracaoDeNuvem } from "./nuvens"
 import elementos from "@/data/elementos.json"
-import { anosDoTimelapse, CAMADAS, dataCompleta, dataPadrao, urlDaImagem, urlDosBlocos } from "./gibs"
+import { anosDoTimelapse, blocosDaCaixa, CAMADAS, dataCompleta, dataPadrao, urlDaImagem, urlDosBlocos, urlWms } from "./gibs"
 import { contarPorCategoria, eventosPerto, normalizarEonet } from "./eventos"
 import { normalizarEpic, urlDaFotoEpic } from "./epic"
 import { caixaAoRedor, destino, distanciaKm, poligonoDaFaixa } from "./geo"
@@ -96,7 +96,8 @@ describe("GIBS", () => {
     expect(urlDosBlocos("x", CAMADAS["cor-noaa20"], "2010-01-01")).toContain("/2018-01-05/")
   })
   it("WMS 1.3.0 em 4326 leva latitude primeiro", () => {
-    expect(urlDaImagem("L", "2020-01-01", { sul: -11, norte: -9, oeste: -64, leste: -61 })).toContain("BBOX=-11,-64,-9,-61")
+    expect(urlWms("L", "2020-01-01", { sul: -11, norte: -9, oeste: -64, leste: -61 })).toContain("BBOX=-11,-64,-9,-61")
+    expect(urlDaImagem("L", "2020-01-01", { sul: -11, norte: -9, oeste: -64, leste: -61 })).toContain("caixa=-11,-64,-9,-61")
   })
   it("time-lapse anda ano a ano no mesmo dia e termina na data pedida", () => {
     const anos = anosDoTimelapse("2026-08-15", "2000-02-24")
@@ -198,5 +199,19 @@ describe("nuvens e Sol", () => {
     const s = solDoDia("2026-12-21", -23.55, -46.63)
     expect(s.duracaoMin).toBeGreaterThan(13 * 60)
     expect(s.nascer && s.por && s.nascer < s.por).toBe(true)
+  })
+})
+
+describe("blocos da caixa", () => {
+  it("o planeta inteiro em 1440 px usa poucos blocos de nível baixo", () => {
+    const b = blocosDaCaixa("BlueMarble_NextGeneration", { sul: -90, norte: 90, oeste: -180, leste: 180 }, 1440)
+    expect(b.nivel).toBe(2)
+    expect([b.c0, b.c1, b.l0, b.l1]).toEqual([0, 4, 0, 2])
+    expect(b.recorte).toEqual({ esquerda: 0, topo: 0, largura: 2560, altura: 1280 })
+  })
+  it("uma área pequena usa o nível mais detalhado da camada", () => {
+    const b = blocosDaCaixa("MODIS_Terra_CorrectedReflectance_TrueColor", { sul: -23.8, norte: -23.3, oeste: -46.9, leste: -46.4 }, 720)
+    expect(b.nivel).toBe(8)
+    expect(b.c1 - b.c0).toBeLessThanOrEqual(1)
   })
 })
