@@ -192,3 +192,7 @@ export const anosDoTimelapse = (dataBase: string, desde: string, passo = 1) => {
   if (datas[datas.length - 1] !== dataBase) datas.push(dataBase)
   return datas
 }
+
+// Uma imagem só do mosaico detalhado em volta de um ponto (Esri World Imagery, export).
+export const urlDoMosaicoDetalhado = (caixa: Caixa, largura = 480, altura = 360) =>
+  `https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export?bbox=${caixa.oeste},${caixa.sul},${caixa.leste},${caixa.norte}&bboxSR=4326&imageSR=3857&size=${largura},${altura}&format=jpg&f=image`
