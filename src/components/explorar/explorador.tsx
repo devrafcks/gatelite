@@ -16,7 +16,7 @@ import {
   IconTimeline,
   IconAlertTriangle,
 } from "@tabler/icons-react"
-import { startTransition, useEffect, useMemo, useState } from "react"
+import { startTransition, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 import { limiteDeZoom, MapaTerra, type Sobreposicoes } from "@/components/mapa/mapa-terra"
 import { BuscaRapida } from "@/components/site/busca-rapida"
@@ -67,6 +67,8 @@ export function Explorador() {
   const [filtro, setFiltro] = useState<CategoriaEvento | null>(null)
   const [aberto, setAberto] = useState(true)
   const [painelVisivel, setPainelVisivel] = useState(true)
+  const gravarZoom = useRef<ReturnType<typeof setTimeout>>(undefined)
+  useEffect(() => () => clearTimeout(gravarZoom.current), [])
   const lugares = useLugaresSalvos((s) => s.lugares)
   const salvar = useLugaresSalvos((s) => s.salvar)
   const remover = useLugaresSalvos((s) => s.remover)
@@ -183,7 +185,10 @@ export function Explorador() {
         aoClicar={(p) =>
           setE({ lat: Number(p.lat.toFixed(4)), lng: Number(p.lng.toFixed(4)), nome: null, passagem: null })
         }
-        aoMover={(_, z) => startTransition(() => void setE({ z: Number(z.toFixed(2)) }))}
+        aoMover={(_, z) => {
+          clearTimeout(gravarZoom.current)
+          gravarZoom.current = setTimeout(() => startTransition(() => void setE({ z: Number(z.toFixed(2)) })), 450)
+        }}
         aoPassarDoLimite={passouDoLimite}
         aoClicarEvento={(id) => {
           const ev = eventos.data?.eventos.find((x) => x.id === id)

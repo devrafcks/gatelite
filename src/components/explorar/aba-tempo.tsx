@@ -33,7 +33,8 @@ export function AbaTempo({
   const base = CAMADAS[camada].dataFixa || camada === "hls" ? CAMADAS["cor-terra"] : CAMADAS[camada]
   const gibsId = base.gibs[0] as string
   const anos = useMemo(() => anosDoTimelapse(data, base.desde), [data, base.desde])
-  const caixa = useMemo(() => caixaAoRedor(lugar, raioPeloZoom(zoom)), [lugar, zoom])
+  const zoomInteiro = Math.round(zoom)
+  const caixa = useMemo(() => caixaAoRedor(lugar, raioPeloZoom(zoomInteiro)), [lugar, zoomInteiro])
   const urls = useMemo(() => anos.map((d) => urlDaImagem(gibsId, d, caixa, 720, 480)), [anos, gibsId, caixa])
 
   const [quadro, setQuadro] = useState(anos.length - 1)
