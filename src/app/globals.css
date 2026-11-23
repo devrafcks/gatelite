@@ -362,3 +362,121 @@
   88% { opacity: 1; }
   100% { transform: translateY(208px); opacity: 0; }
 }
+
+/* ---------- abertura (só na primeira visita) ---------- */
+html[data-abertura="vista"] .abertura {
+  display: none;
+}
+.abertura {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 0.85s cubic-bezier(0.76, 0, 0.24, 1);
+}
+.abertura[data-fase="saindo"] {
+  clip-path: inset(0 0 100% 0);
+  pointer-events: none;
+}
+.abertura__ceu {
+  background: radial-gradient(
+    98% 112% at 50% 0%,
+    #08090d 38%,
+    #0c1124 52%,
+    #1b2a66 62%,
+    #2b5bd7 72%,
+    #ff5a1f 82%,
+    #ffb547 90%,
+    #fff1d6 100%
+  );
+  transform-origin: 50% 0%;
+  animation:
+    ceu-nasce 1.6s cubic-bezier(0.25, 0.1, 0.25, 1) both,
+    ceu-respira 5.6s ease-in-out 1.6s infinite alternate;
+}
+@keyframes ceu-nasce {
+  from {
+    opacity: 0;
+    transform: scale(1.4);
+  }
+}
+@keyframes ceu-respira {
+  to {
+    transform: scale(1.05);
+  }
+}
+.abertura__conteudo {
+  animation: subir-suave 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.25s both;
+  transition:
+    opacity 0.4s,
+    transform 0.4s;
+}
+.abertura[data-fase="saindo"] .abertura__conteudo {
+  opacity: 0;
+  transform: translateY(-24px);
+}
+.abertura__barra {
+  background: linear-gradient(90deg, #ffb547, #ff5a1f);
+  animation: barra-enche 2.2s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+@keyframes barra-enche {
+  from {
+    transform: scaleX(0);
+  }
+}
+.abertura__frase {
+  animation: frase-entra 0.35s ease-out both;
+}
+@keyframes frase-entra {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+    filter: blur(4px);
+  }
+}
+@keyframes subir-suave {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .abertura__ceu,
+  .abertura__conteudo,
+  .abertura__frase {
+    animation: none;
+  }
+  .abertura__barra {
+    animation-duration: 0.7s;
+  }
+  .abertura {
+    transition: opacity 0.3s;
+  }
+  .abertura[data-fase="saindo"] {
+    clip-path: inset(0 0 0 0);
+    opacity: 0;
+  }
+}
+
+/* ---------- entradas ---------- */
+/* cartões que chegam em cascata (o atraso vem inline, por índice) */
+.entrar {
+  animation: subir-suave 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+/* seções que sobem ao entrar na tela, direto no compositor (sem JavaScript) */
+@supports (animation-timeline: view()) {
+  .revelar {
+    animation: revelar linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 40%;
+  }
+}
+@keyframes revelar {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .entrar,
+  .revelar {
+    animation: none;
+  }
+}

@@ -29,7 +29,7 @@ export default function Inicio() {
 
       <main>
         {/* ── Quem passou por cima ── */}
-        <section className="mx-auto grid max-w-7xl gap-12 px-4 py-24 md:px-6 lg:grid-cols-12">
+        <section className="revelar mx-auto grid max-w-7xl gap-12 px-4 py-24 md:px-6 lg:grid-cols-12">
           <div className="lg:col-span-5">
             <h2 className="titulo-display text-[clamp(2rem,4vw,3.3rem)] font-light">
               Hoje, <span className="font-semibold">vários satélites</span> já passaram por cima da sua casa.
@@ -94,7 +94,7 @@ export default function Inicio() {
         </section>
 
         {/* ── Antes e depois ── */}
-        <section className="mx-auto grid max-w-7xl gap-12 px-4 py-24 md:px-6 lg:grid-cols-12">
+        <section className="revelar mx-auto grid max-w-7xl gap-12 px-4 py-24 md:px-6 lg:grid-cols-12">
           <div className="order-2 lg:order-1 lg:col-span-7">
             <Cortina antes={ANTES} depois={DEPOIS} rotuloAntes="Jul 2002" rotuloDepois="Jul 2024" />
             <p className="mt-3 text-xs text-muted-foreground">
@@ -116,7 +116,7 @@ export default function Inicio() {
         </section>
 
         {/* ── O planeta agora ── */}
-        <section className="mx-auto max-w-7xl px-4 pb-24 md:px-6">
+        <section className="revelar mx-auto max-w-7xl px-4 pb-24 md:px-6">
           <div className="mb-10 grid gap-6 lg:grid-cols-12">
             <h2 className="titulo-display text-[clamp(2rem,4vw,3.3rem)] font-light lg:col-span-6">
               Enquanto você lê, <span className="font-semibold">o planeta está assim.</span>
@@ -132,7 +132,7 @@ export default function Inicio() {
         </section>
 
         {/* ── Fechamento ── */}
-        <section className="mx-auto max-w-7xl px-4 md:px-6">
+        <section className="revelar mx-auto max-w-7xl px-4 md:px-6">
           <div className="estrelas faixa relative overflow-hidden rounded-3xl border px-6 py-16 text-white sm:px-14 sm:py-20">
             <div className="gradiente-sol absolute -top-40 -right-24 size-[26rem] rounded-full opacity-35 blur-3xl" aria-hidden />
             <h2 className="titulo-display relative max-w-3xl text-[clamp(2.3rem,5.4vw,4.6rem)] font-light">

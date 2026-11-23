@@ -34,7 +34,7 @@ export default function PaginaSobre() {
           só, em português, e liga duas coisas que quase ninguém liga: o satélite que passou e a foto que ele tirou.
         </p>
 
-        <section className="mt-16" id="como">
+        <section className="revelar mt-16" id="como">
           <h2 className="titulo-display text-3xl font-light">Como as passagens são calculadas</h2>
           <div className="mt-5 space-y-4 leading-relaxed text-muted-foreground">
             <p>
@@ -49,7 +49,7 @@ export default function PaginaSobre() {
           </div>
         </section>
 
-        <section className="mt-16" id="fontes">
+        <section className="revelar mt-16" id="fontes">
           <h2 className="titulo-display text-3xl font-light">Fontes dos dados</h2>
           <ul className="mt-6 divide-y rounded-2xl border bg-card">
             {FONTES.map((f) => (
@@ -69,7 +69,7 @@ export default function PaginaSobre() {
           </p>
         </section>
 
-        <section className="mt-16" id="privacidade">
+        <section className="revelar mt-16" id="privacidade">
           <h2 className="titulo-display text-3xl font-light">Privacidade</h2>
           <div className="mt-5 space-y-4 leading-relaxed text-muted-foreground">
             <p>Não há conta, cadastro nem banco de dados. Os lugares salvos ficam só no seu navegador.</p>
