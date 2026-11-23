@@ -98,7 +98,11 @@ export function MapaDoAgora() {
           {[0, 23.44, -23.44].map((lat) => (
             <line key={lat} x1="0" x2={L} y1={y(lat)} y2={y(lat)} stroke="#fff" strokeOpacity={lat === 0 ? 0.18 : 0.08} strokeDasharray="4 8" />
           ))}
+        </svg>
 
+        {/* camada viva por cima, num svg à parte: os satélites andam a cada 5 s sem obrigar o
+            navegador a redesenhar as imagens e a máscara desfocada da noite que estão embaixo */}
+        <svg viewBox={`0 0 ${L} ${A}`} className="absolute inset-0 block h-full w-full [contain:strict]" aria-hidden>
           {(camada === "tudo" || camada === "eventos") &&
             listaEventos.map((e) => (
               <circle key={e.id} cx={x(e.lng)} cy={y(e.lat)} r="3" fill={COR_DA_CATEGORIA[e.categoria]} fillOpacity="0.9" stroke="#05060a" strokeOpacity="0.6" strokeWidth="1">
