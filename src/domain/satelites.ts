@@ -1,0 +1,194 @@
+import type { IdCamada } from "./gibs"
+
+// Os satélites acompanhados. Os números são do catálogo NORAD; resolução e faixa são as do
+// instrumento principal de imagem. A camada GIBS liga o satélite à foto que ele tira.
+export type Satelite = {
+  readonly norad: number
+  readonly nome: string
+  readonly operador: string
+  readonly sensor: string
+  /** melhor resolução do sensor principal, em metros */
+  readonly resolucaoM: number
+  /** largura da faixa de imagem no chão, em km (0 = não fotografa a Terra) */
+  readonly faixaKm: number
+  /** só enxerga com luz do Sol? */
+  readonly optico: boolean
+  readonly camada?: IdCamada
+  readonly resumo: string
+  readonly familia: "nasa-diaria" | "alta-resolucao" | "brasil" | "estacao"
+}
+
+export const SATELITES: readonly Satelite[] = [
+  {
+    norad: 25994,
+    nome: "Terra",
+    operador: "NASA",
+    sensor: "MODIS",
+    resolucaoM: 250,
+    faixaKm: 2330,
+    optico: true,
+    camada: "cor-terra",
+    resumo: "Desde 1999 fotografa o planeta inteiro a cada um ou dois dias, sempre por volta das 10h30 da manhã.",
+    familia: "nasa-diaria",
+  },
+  {
+    norad: 27424,
+    nome: "Aqua",
+    operador: "NASA",
+    sensor: "MODIS",
+    resolucaoM: 250,
+    faixaKm: 2330,
+    optico: true,
+    camada: "cor-aqua",
+    resumo: "O par do Terra, na parte da tarde: passa por volta das 13h30 e acompanha água, nuvens e gelo.",
+    familia: "nasa-diaria",
+  },
+  {
+    norad: 43013,
+    nome: "NOAA-20",
+    operador: "NOAA/NASA",
+    sensor: "VIIRS",
+    resolucaoM: 375,
+    faixaKm: 3060,
+    optico: true,
+    camada: "cor-noaa20",
+    resumo: "Faixa de 3 mil km: cobre a Terra inteira duas vezes por dia, de dia e de noite.",
+    familia: "nasa-diaria",
+  },
+  {
+    norad: 54234,
+    nome: "NOAA-21",
+    operador: "NOAA/NASA",
+    sensor: "VIIRS",
+    resolucaoM: 375,
+    faixaKm: 3060,
+    optico: true,
+    camada: "cor-noaa21",
+    resumo: "O mais novo da série JPSS, lançado em 2022, voando meia órbita à frente do NOAA-20.",
+    familia: "nasa-diaria",
+  },
+  {
+    norad: 37849,
+    nome: "Suomi NPP",
+    operador: "NASA/NOAA",
+    sensor: "VIIRS",
+    resolucaoM: 375,
+    faixaKm: 3060,
+    optico: true,
+    resumo: "O pioneiro do VIIRS, de 2011. É dele o mapa das luzes da Terra à noite.",
+    familia: "nasa-diaria",
+  },
+  {
+    norad: 39084,
+    nome: "Landsat 8",
+    operador: "NASA/USGS",
+    sensor: "OLI",
+    resolucaoM: 30,
+    faixaKm: 185,
+    optico: true,
+    camada: "hls",
+    resumo: "Parte da série que fotografa a Terra desde 1972. Vê cada lugar a cada 16 dias, em detalhe de 30 m.",
+    familia: "alta-resolucao",
+  },
+  {
+    norad: 49260,
+    nome: "Landsat 9",
+    operador: "NASA/USGS",
+    sensor: "OLI-2",
+    resolucaoM: 30,
+    faixaKm: 185,
+    optico: true,
+    camada: "hls",
+    resumo: "Voa defasado 8 dias do Landsat 8: juntos, revisitam cada lugar a cada 8 dias.",
+    familia: "alta-resolucao",
+  },
+  {
+    norad: 40697,
+    nome: "Sentinel-2A",
+    operador: "ESA",
+    sensor: "MSI",
+    resolucaoM: 10,
+    faixaKm: 290,
+    optico: true,
+    camada: "hls",
+    resumo: "Do programa europeu Copernicus. Detalhe de 10 m, ótimo para lavoura e floresta.",
+    familia: "alta-resolucao",
+  },
+  {
+    norad: 42063,
+    nome: "Sentinel-2B",
+    operador: "ESA",
+    sensor: "MSI",
+    resolucaoM: 10,
+    faixaKm: 290,
+    optico: true,
+    camada: "hls",
+    resumo: "Gêmeo do 2A, do lado oposto da órbita.",
+    familia: "alta-resolucao",
+  },
+  {
+    norad: 60989,
+    nome: "Sentinel-2C",
+    operador: "ESA",
+    sensor: "MSI",
+    resolucaoM: 10,
+    faixaKm: 290,
+    optico: true,
+    camada: "hls",
+    resumo: "Lançado em 2024 para assumir o lugar do 2A.",
+    familia: "alta-resolucao",
+  },
+  {
+    norad: 40336,
+    nome: "CBERS-4",
+    operador: "INPE/CAST",
+    sensor: "WFI",
+    resolucaoM: 64,
+    faixaKm: 866,
+    optico: true,
+    resumo: "Parceria Brasil–China. As imagens alimentam o monitoramento do desmatamento na Amazônia.",
+    familia: "brasil",
+  },
+  {
+    norad: 44883,
+    nome: "CBERS-4A",
+    operador: "INPE/CAST",
+    sensor: "WFI",
+    resolucaoM: 55,
+    faixaKm: 684,
+    optico: true,
+    resumo: "O sucessor do CBERS-4, lançado em 2019, com câmera pancromática de 2 m.",
+    familia: "brasil",
+  },
+  {
+    norad: 47699,
+    nome: "Amazonia-1",
+    operador: "INPE",
+    sensor: "WFI",
+    resolucaoM: 60,
+    faixaKm: 850,
+    optico: true,
+    resumo: "O primeiro satélite de observação projetado e integrado no Brasil, lançado em 2021.",
+    familia: "brasil",
+  },
+  {
+    norad: 25544,
+    nome: "ISS",
+    operador: "NASA e parceiros",
+    sensor: "Tripulação",
+    resolucaoM: 0,
+    faixaKm: 0,
+    optico: true,
+    resumo: "A Estação Espacial Internacional. Não é satélite de imagem, mas dá para ver passando no céu.",
+    familia: "estacao",
+  },
+]
+
+export const satelitePorNorad = (norad: number) => SATELITES.find((s) => s.norad === norad)
+
+export const FAMILIAS = {
+  "nasa-diaria": "Cobertura diária",
+  "alta-resolucao": "Alta resolução",
+  brasil: "Satélites brasileiros",
+  estacao: "Estação espacial",
+} as const
