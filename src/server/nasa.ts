@@ -5,8 +5,6 @@ import { type FotoEpic, normalizarEpic } from "@/domain/epic"
 import type { ElementoOrbital } from "@/domain/orbitas"
 import { SATELITES } from "@/domain/satelites"
 
-// Cada fonte externa passa por aqui: timeout, cache e reserva. A tela recebe o dado ou um
-// motivo claro, nunca uma página quebrada.
 const AGENTE = "Gatelite/1.0 (projeto educativo)"
 const CHAVE_NASA = process.env.NASA_API_KEY ?? "DEMO_KEY"
 
@@ -19,12 +17,10 @@ const pegarJson = async <T>(url: string, timeoutMs = 15_000): Promise<T> => {
   return (await r.json()) as T
 }
 
-// ── Órbitas ──────────────────────────────────────────────────────────────────
 export type Elementos = { readonly fonte: "CelesTrak" | "cópia local"; readonly elementos: readonly ElementoOrbital[] }
 
 export async function buscarElementos(): Promise<Elementos> {
   "use cache"
-  // a CelesTrak pede no máximo uma busca a cada 2 h: os elementos mudam devagar
   cacheLife({ stale: 3600, revalidate: 4 * 3600, expire: 86_400 })
   try {
     const lista = await Promise.all(
@@ -36,17 +32,14 @@ export async function buscarElementos(): Promise<Elementos> {
     )
     const ok = lista.filter((e): e is ElementoOrbital => e != null)
     if (ok.length >= SATELITES.length - 2) {
-      // completa o que faltou com a cópia local
       const faltando = (elementosLocais as ElementoOrbital[]).filter((l) => !ok.some((e) => e.NORAD_CAT_ID === l.NORAD_CAT_ID))
       return { fonte: "CelesTrak", elementos: [...ok, ...faltando] }
     }
   } catch {
-    // reserva abaixo
   }
   return { fonte: "cópia local", elementos: elementosLocais as ElementoOrbital[] }
 }
 
-// ── EPIC ─────────────────────────────────────────────────────────────────────
 export async function buscarDatasEpic(): Promise<string[]> {
   "use cache"
   cacheLife("hours")
@@ -62,7 +55,6 @@ export async function buscarFotosEpic(data?: string): Promise<FotoEpic[]> {
   return normalizarEpic(await pegarJson(url))
 }
 
-// ── EONET ────────────────────────────────────────────────────────────────────
 export type Eventos = { readonly atualizadoEm: string; readonly eventos: readonly Evento[] }
 
 export async function buscarEventos(): Promise<Eventos> {
@@ -75,7 +67,6 @@ export async function buscarEventos(): Promise<Eventos> {
   return { atualizadoEm: new Date().toISOString(), eventos: normalizarEonet(r) }
 }
 
-// ── APOD ─────────────────────────────────────────────────────────────────────
 export type Apod = {
   readonly data: string
   readonly titulo: string
@@ -86,18 +77,23 @@ export type Apod = {
   readonly credito: string | null
 }
 
+type RespostaApod = {
+  date: string
+  title: string
+  explanation: string
+  url: string
+  hdurl?: string
+  media_type: Apod["tipo"]
+  copyright?: string
+}
+
 export async function buscarApod(): Promise<Apod> {
   "use cache"
   cacheLife("hours")
-  const r = await pegarJson<{
-    date: string
-    title: string
-    explanation: string
-    url: string
-    hdurl?: string
-    media_type: Apod["tipo"]
-    copyright?: string
-  }>(`https://api.nasa.gov/planetary/apod?api_key=${CHAVE_NASA}&thumbs=true`)
+  const pedir = (data?: string) =>
+    pegarJson<RespostaApod>(`https://api.nasa.gov/planetary/apod?api_key=${CHAVE_NASA}&thumbs=true${data ? `&date=${data}` : ""}`)
+  const ontem = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10)
+  const r = await pedir().catch(() => pedir(ontem))
   return {
     data: r.date,
     titulo: r.title,
@@ -109,7 +105,6 @@ export async function buscarApod(): Promise<Apod> {
   }
 }
 
-// ── Busca de lugares ─────────────────────────────────────────────────────────
 export type Lugar = { readonly nome: string; readonly detalhe: string; readonly lat: number; readonly lng: number }
 
 type RespostaPhoton = {
@@ -122,7 +117,6 @@ type RespostaGeocoding = {
   results?: { name: string; latitude: number; longitude: number; admin1?: string; country?: string }[]
 }
 
-// Mesma consulta, mesma chave de cache: "  São   Paulo" e "são paulo" viram uma coisa só.
 export const normalizarConsulta = (q: string) => q.trim().replace(/\s+/g, " ").toLowerCase()
 
 const doPhoton = async (q: string): Promise<Lugar[]> => {
@@ -155,8 +149,6 @@ export async function buscarLugares(consulta: string): Promise<Lugar[]> {
   "use cache"
   cacheLife("days")
   const q = encodeURIComponent(normalizarConsulta(consulta))
-  // os dois provedores ao mesmo tempo: a primeira resposta útil ganha, e a outra tem
-  // um respiro curto para somar resultados. Ninguém espera um timeout para tentar o outro.
   const tentativas = [doPhoton(q), doOpenMeteo(q)]
   const util = (p: Promise<Lugar[]>) => p.then((r) => (r.length ? r : Promise.reject(new Error("vazio"))))
   let primeiro: Lugar[]
