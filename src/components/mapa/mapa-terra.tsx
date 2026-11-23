@@ -110,6 +110,9 @@ export function MapaTerra({
   const [pronto, setPronto] = useState(false)
   const [globo, setGlobo] = useState(true)
   const [zoomAtual, setZoomAtual] = useState(visao.zoom)
+  const trilha = useRef<HTMLSpanElement>(null)
+  const nivel = useRef<HTMLSpanElement>(null)
+  const medidor = useRef<HTMLDivElement>(null)
   const cbs = useRef({ aoClicar, aoMover, aoClicarEvento, aoClicarSatelite, aoPassarDoLimite })
   cbs.current = { aoClicar, aoMover, aoClicarEvento, aoClicarSatelite, aoPassarDoLimite }
   const camadaAtual = useRef(camada)
@@ -129,7 +132,7 @@ export function MapaTerra({
       canvasContextAttributes: { alpha: true, antialias: false, powerPreference: "high-performance" } as never,
       pixelRatio: Math.min(window.devicePixelRatio || 1, 1.5),
       renderWorldCopies: false,
-      fadeDuration: 120,
+      fadeDuration: 60,
     })
     mapa.current = m
 
@@ -219,14 +222,17 @@ export function MapaTerra({
         const c = m.getCenter()
         cbs.current.aoMover?.({ lat: c.lat, lng: c.lng }, m.getZoom())
       })
-      let quadroZoom = 0
-      m.on("zoom", () => {
-        if (quadroZoom) return
-        quadroZoom = requestAnimationFrame(() => {
-          quadroZoom = 0
-          setZoomAtual(m.getZoom())
-        })
-      })
+      m.scrollZoom.setWheelZoomRate(1 / 100)
+      m.scrollZoom.setZoomRate(1 / 60)
+      const pintarNivel = () => {
+        const z = m.getZoom()
+        const f = Math.max(0, Math.min(1, (z - ZOOM_MINIMO) / (m.getMaxZoom() - ZOOM_MINIMO)))
+        if (trilha.current) trilha.current.style.transform = `scaleY(${f})`
+        if (nivel.current) nivel.current.textContent = z.toFixed(0)
+        medidor.current?.setAttribute("aria-valuenow", z.toFixed(1))
+      }
+      m.on("zoom", pintarNivel)
+      m.on("zoomend", () => setZoomAtual(m.getZoom()))
       m.on("zoomend", () => {
         const c = camadaAtual.current
         if (!c.blocos && m.getZoom() > limiteDeZoom(c)) cbs.current.aoPassarDoLimite?.()
@@ -259,7 +265,7 @@ export function MapaTerra({
           source: f.id,
           paint: {
             "raster-opacity": f.principal ? opacidade : 1,
-            "raster-fade-duration": 150,
+            "raster-fade-duration": 80,
             "raster-contrast": camada.blocos ? 0 : 0.16,
             "raster-saturation": camada.blocos ? 0 : 0.2,
             "raster-resampling": "linear",
@@ -361,7 +367,7 @@ export function MapaTerra({
     })
   }, [sobreposicoes, pronto])
 
-  const zoom = (d: number) => mapa.current?.easeTo({ zoom: (mapa.current?.getZoom() ?? 5) + d, duration: 300 })
+  const zoom = (d: number) => mapa.current?.easeTo({ zoom: (mapa.current?.getZoom() ?? 5) + d, duration: 220 })
   const centro = () => (ponto ? ([ponto.lng, ponto.lat] as [number, number]) : mapa.current?.getCenter())
   const maximo = limiteDeZoom(camada)
   const fracao = Math.max(0, Math.min(1, (zoomAtual - ZOOM_MINIMO) / (ZOOM_MAXIMO(camada) - ZOOM_MINIMO)))
@@ -393,13 +399,17 @@ export function MapaTerra({
             aria-valuemin={ZOOM_MINIMO}
             aria-valuemax={ZOOM_MAXIMO(camada)}
             aria-valuenow={Number(zoomAtual.toFixed(1))}
+            ref={medidor}
           >
             <span
-              className="absolute inset-x-0 bottom-0 origin-bottom rounded-full bg-white transition-transform duration-150"
-              style={{ height: "100%", transform: `scaleY(${fracao})` }}
+              ref={trilha}
+              className="absolute inset-x-0 bottom-0 h-full origin-bottom rounded-full bg-white will-change-transform"
+              style={{ transform: `scaleY(${fracao})` }}
             />
           </div>
-          <span className="numero text-[10px] text-white/60">{zoomAtual.toFixed(0)}</span>
+          <span ref={nivel} className="numero text-[10px] text-white/60">
+            {zoomAtual.toFixed(0)}
+          </span>
           <BotaoDoMapa rotulo="Afastar" onClick={() => zoom(-1)} disabled={zoomAtual <= ZOOM_MINIMO + 0.01}>
             <IconMinus className="size-[18px]" stroke={1.5} />
           </BotaoDoMapa>

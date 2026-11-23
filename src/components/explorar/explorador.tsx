@@ -16,7 +16,7 @@ import {
   IconTimeline,
   IconAlertTriangle,
 } from "@tabler/icons-react"
-import { useEffect, useMemo, useState } from "react"
+import { startTransition, useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 import { limiteDeZoom, MapaTerra, type Sobreposicoes } from "@/components/mapa/mapa-terra"
 import { BuscaRapida } from "@/components/site/busca-rapida"
@@ -183,7 +183,7 @@ export function Explorador() {
         aoClicar={(p) =>
           setE({ lat: Number(p.lat.toFixed(4)), lng: Number(p.lng.toFixed(4)), nome: null, passagem: null })
         }
-        aoMover={(_, z) => setE({ z: Number(z.toFixed(2)) })}
+        aoMover={(_, z) => startTransition(() => void setE({ z: Number(z.toFixed(2)) }))}
         aoPassarDoLimite={passouDoLimite}
         aoClicarEvento={(id) => {
           const ev = eventos.data?.eventos.find((x) => x.id === id)
