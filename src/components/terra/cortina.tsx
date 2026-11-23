@@ -11,9 +11,15 @@ export function Cortina({
   rotuloDepois,
   className,
   proporcao = "3 / 2",
+  antesSrcSet,
+  depoisSrcSet,
+  tamanhos,
 }: {
   antes: string
   depois: string
+  antesSrcSet?: string
+  depoisSrcSet?: string
+  tamanhos?: string
   rotuloAntes: string
   rotuloDepois: string
   className?: string
@@ -48,6 +54,8 @@ export function Cortina({
     >
       <img
         src={depois}
+        srcSet={depoisSrcSet}
+        sizes={tamanhos}
         alt={rotuloDepois}
         loading="lazy"
         decoding="async"
@@ -57,6 +65,8 @@ export function Cortina({
       <div className="absolute inset-0" style={{ clipPath: "inset(0 calc(100% - var(--pos)) 0 0)" }}>
         <img
           src={antes}
+          srcSet={antesSrcSet}
+          sizes={tamanhos}
           alt={rotuloAntes}
           loading="lazy"
           decoding="async"

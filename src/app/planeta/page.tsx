@@ -18,8 +18,12 @@ export const metadata: Metadata = {
 }
 
 const MUNDO = { sul: -50, norte: 55, oeste: -180, leste: 180 }
-const JUNHO = urlDaImagem("VIIRS_NOAA20_CorrectedReflectance_TrueColor", "2025-06-21", MUNDO, 1440, 420)
-const DEZEMBRO = urlDaImagem("VIIRS_NOAA20_CorrectedReflectance_TrueColor", "2025-12-21", MUNDO, 1440, 420)
+const estacao = (data: string) => {
+  const url = (l: number) => urlDaImagem("VIIRS_NOAA20_CorrectedReflectance_TrueColor", data, MUNDO, l, Math.round((l * 7) / 24))
+  return { src: url(1440), srcSet: `${url(720)} 720w, ${url(1440)} 1440w` }
+}
+const JUNHO = estacao("2025-06-21")
+const DEZEMBRO = estacao("2025-12-21")
 
 export default function PaginaPlaneta() {
   return (
@@ -66,7 +70,16 @@ export default function PaginaPlaneta() {
               que sobe e desce com o Sol.
             </p>
           </div>
-          <Cortina antes={JUNHO} depois={DEZEMBRO} rotuloAntes="21 jun 2025" rotuloDepois="21 dez 2025" proporcao="24 / 7" />
+          <Cortina
+            antes={JUNHO.src}
+            depois={DEZEMBRO.src}
+            antesSrcSet={JUNHO.srcSet}
+            depoisSrcSet={DEZEMBRO.srcSet}
+            tamanhos="(min-width: 1280px) 1216px, 100vw"
+            rotuloAntes="21 jun 2025"
+            rotuloDepois="21 dez 2025"
+            proporcao="24 / 7"
+          />
           <p className="mt-3 text-xs text-muted-foreground">VIIRS/NOAA-20, cor real, de 50° S a 55° N.</p>
         </section>
 
