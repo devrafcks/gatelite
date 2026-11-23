@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
-import { useFrota } from "@/lib/consultas"
+import { useFrota } from "@/lib/frota"
 
 const GloboPontilhado = dynamic(() => import("@/components/terra/globo-pontilhado").then((m) => m.GloboPontilhado), {
   ssr: false,

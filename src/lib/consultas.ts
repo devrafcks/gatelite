@@ -1,13 +1,10 @@
 "use client"
 
 import { keepPreviousData, useQuery } from "@tanstack/react-query"
-import { useMemo } from "react"
 import type { FotoEpic } from "@/domain/epic"
-import { criarSatrec } from "@/domain/orbitas"
-import { SATELITES } from "@/domain/satelites"
 import type { Apod, Elementos, Eventos, Lugar } from "@/server/nasa"
 
-const pegar = async <T>(url: string, signal?: AbortSignal): Promise<T> => {
+export const pegar = async <T>(url: string, signal?: AbortSignal): Promise<T> => {
   const r = await fetch(url, { signal })
   const corpo = await r.json().catch(() => ({}))
   if (!r.ok) throw new Error(corpo?.erro ?? `Falha ${r.status}`)
@@ -16,18 +13,6 @@ const pegar = async <T>(url: string, signal?: AbortSignal): Promise<T> => {
 
 export const useElementos = () =>
   useQuery({ queryKey: ["elementos"], queryFn: () => pegar<Elementos>("/api/elementos"), staleTime: 2 * 3_600_000 })
-
-export const useFrota = () => {
-  const q = useElementos()
-  const frota = useMemo(() => {
-    if (!q.data) return []
-    return SATELITES.flatMap((sat) => {
-      const e = q.data.elementos.find((x) => x.NORAD_CAT_ID === sat.norad)
-      return e ? [{ sat, elemento: e, satrec: criarSatrec(e) }] : []
-    })
-  }, [q.data])
-  return { ...q, frota }
-}
 
 export const useEventos = () =>
   useQuery({ queryKey: ["eventos"], queryFn: () => pegar<Eventos>("/api/eventos"), staleTime: 15 * 60_000 })

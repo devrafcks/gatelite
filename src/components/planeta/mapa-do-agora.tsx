@@ -8,7 +8,8 @@ import { dataCompleta, urlDaImagem } from "@/domain/gibs"
 import { posicaoEm } from "@/domain/orbitas"
 import { luaDoMomento } from "@/domain/lua"
 import { poligonoDaNoite, pontoSubsolar } from "@/domain/terminador"
-import { useEventos, useFrota } from "@/lib/consultas"
+import { useEventos } from "@/lib/consultas"
+import { useFrota } from "@/lib/frota"
 import { coordenada, numero } from "@/lib/formato"
 import { useImagemSemPreto } from "@/lib/sem-preto"
 import { cn } from "@/lib/utils"
@@ -22,20 +23,25 @@ const caminho = (pts: [number, number][]) => `M${pts.map(([lng, lat]) => `${x(ln
 
 export function MapaDoAgora() {
   const [agora, setAgora] = useState<Date | null>(null)
+  const [largura, setLargura] = useState<number | null>(null)
   const [camada, setCamada] = useState<"tudo" | "satelites" | "eventos">("tudo")
   const { frota } = useFrota()
   const eventos = useEventos()
 
   useEffect(() => {
     setAgora(new Date())
+    setLargura(window.innerWidth * Math.min(window.devicePixelRatio || 1, 2) > 1100 ? 1440 : 720)
     const id = setInterval(() => setAgora(new Date()), 5000)
     return () => clearInterval(id)
   }, [])
 
   const ontem = agora ? dataCompleta(agora) : null
-  const base = urlDaImagem("BlueMarble_NextGeneration", "2004-08-01", MUNDO, 1440, 720)
-  const dia = useImagemSemPreto(ontem ? urlDaImagem("VIIRS_NOAA20_CorrectedReflectance_TrueColor", ontem, MUNDO, 1200, 600, "png") : null)
-  const luzes = urlDaImagem("VIIRS_Black_Marble", "2016-01-01", MUNDO, 1440, 720)
+  const base = largura ? urlDaImagem("BlueMarble_NextGeneration", "2004-08-01", MUNDO, largura, largura / 2) : null
+  const dia = useImagemSemPreto(
+    ontem && largura ? urlDaImagem("VIIRS_NOAA20_CorrectedReflectance_TrueColor", ontem, MUNDO, largura, largura / 2) : null,
+    24,
+  )
+  const luzes = largura ? urlDaImagem("VIIRS_Black_Marble", "2016-01-01", MUNDO, largura, largura / 2) : null
 
   const minuto = agora ? Math.floor(agora.getTime() / 60_000) : 0
   const sol = useMemo(() => (agora ? pontoSubsolar(agora) : null), [minuto])
@@ -78,11 +84,11 @@ export function MapaDoAgora() {
           </defs>
 
           <rect width={L} height={A} fill="#0c1124" />
-          <image href={base} width={L} height={A} preserveAspectRatio="none" opacity="0.7" />
+          {base && <image href={base} width={L} height={A} preserveAspectRatio="none" opacity="0.7" />}
           {dia && <image href={dia} width={L} height={A} preserveAspectRatio="none" />}
           <g mask="url(#mascara-noite)">
             <rect width={L} height={A} fill="#020308" opacity="0.82" />
-            <image href={luzes} width={L} height={A} preserveAspectRatio="none" style={{ mixBlendMode: "screen" }} />
+            {luzes && <image href={luzes} width={L} height={A} preserveAspectRatio="none" style={{ mixBlendMode: "screen" }} />}
           </g>
           <path d={noiteFunda} fill="#020308" opacity="0.18" filter="url(#borda-macia)" />
 

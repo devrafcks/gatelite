@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import type { LatLng } from "@/domain/geo"
 import type { Passagem } from "@/domain/orbitas"
 import { type Satelite, satelitePorNorad } from "@/domain/satelites"
-import { useFrota } from "@/lib/consultas"
+import { useFrota } from "@/lib/frota"
 
 export type PassagemComSatelite = Passagem & { readonly sat: Satelite }
 

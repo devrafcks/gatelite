@@ -4,7 +4,7 @@ import { geoGraticule, geoOrthographic, geoPath } from "d3-geo"
 import { useEffect, useRef, useState } from "react"
 import type { LatLng } from "@/domain/geo"
 import { posicaoEm, rastroEntre } from "@/domain/orbitas"
-import type { useFrota } from "@/lib/consultas"
+import type { useFrota } from "@/lib/frota"
 import { cn } from "@/lib/utils"
 
 type Frota = ReturnType<typeof useFrota>["frota"]
