@@ -4,8 +4,7 @@ import { Suspense } from "react"
 import { BuscaRapida } from "@/components/site/busca-rapida"
 import { AvisoFontes, Rodape } from "@/components/site/rodape"
 import { Cortina } from "@/components/terra/cortina"
-import { GloboDaLanding } from "@/components/satelites/globo-da-landing"
-import { QuemPassou } from "@/components/terra/quem-passou"
+import { GloboTardio, QuemPassouTardio } from "@/components/terra/tardios"
 import { EventosAgora, HeroDaTerra, HeroEstatico } from "@/components/terra/secoes-servidor"
 import { Button } from "@/components/ui/button"
 import { urlDaImagem } from "@/domain/gibs"
@@ -41,7 +40,7 @@ export default function Inicio() {
             </p>
           </div>
           <div className="lg:col-span-6 lg:col-start-7">
-            <QuemPassou />
+            <QuemPassouTardio />
           </div>
         </section>
 
@@ -58,7 +57,7 @@ export default function Inicio() {
               </p>
               </div>
               <div className="mx-auto w-full max-w-[30rem] lg:col-span-5 lg:col-start-8">
-                <GloboDaLanding />
+                <GloboTardio />
                 <p className="mt-2 text-center text-xs text-white/45">Posição de agora · arraste para girar</p>
               </div>
             </div>
