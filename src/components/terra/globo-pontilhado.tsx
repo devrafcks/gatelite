@@ -78,6 +78,36 @@ export function GloboPontilhado({
     let posicoesNaTela: { norad: number; x: number; y: number }[] = []
     const reduzido = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
 
+    let fundo: HTMLCanvasElement | null = null
+    const pintarFundo = (dpr: number) => {
+      const c = document.createElement("canvas")
+      c.width = Math.round(largura * dpr)
+      c.height = Math.round(altura * dpr)
+      const g = c.getContext("2d")
+      if (!g) return null
+      g.setTransform(dpr, 0, 0, dpr, 0, 0)
+      const cx = largura / 2
+      const cy = altura / 2
+      const halo = g.createRadialGradient(cx, cy, raio * 0.92, cx, cy, raio * 1.16)
+      halo.addColorStop(0, "rgba(64,120,255,0.26)")
+      halo.addColorStop(1, "rgba(64,120,255,0)")
+      g.fillStyle = halo
+      g.beginPath()
+      g.arc(cx, cy, raio * 1.16, 0, Math.PI * 2)
+      g.fill()
+      const oceano = g.createRadialGradient(cx - raio * 0.35, cy - raio * 0.4, raio * 0.1, cx, cy, raio)
+      oceano.addColorStop(0, "#111a33")
+      oceano.addColorStop(1, "#070a14")
+      g.fillStyle = oceano
+      g.beginPath()
+      g.arc(cx, cy, raio, 0, Math.PI * 2)
+      g.fill()
+      g.strokeStyle = "rgba(255,255,255,0.22)"
+      g.lineWidth = 1
+      g.stroke()
+      return c
+    }
+
     const medir = () => {
       const r = div.getBoundingClientRect()
       const dpr = Math.min(1.5, window.devicePixelRatio || 1)
@@ -90,6 +120,7 @@ export function GloboPontilhado({
       canvas.style.height = `${altura}px`
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
       projecao.scale(raio).translate([largura / 2, altura / 2])
+      fundo = pintarFundo(dpr)
       ultimoDesenho = 0
     }
 
@@ -105,26 +136,9 @@ export function GloboPontilhado({
     const desenhar = (agora: number) => {
       const { frota: f, marcador: m, destaque: d } = estado.current
       ctx.clearRect(0, 0, largura, altura)
+      if (fundo) ctx.drawImage(fundo, 0, 0, largura, altura)
       const cx = largura / 2
       const cy = altura / 2
-
-      const halo = ctx.createRadialGradient(cx, cy, raio * 0.92, cx, cy, raio * 1.16)
-      halo.addColorStop(0, "rgba(64,120,255,0.26)")
-      halo.addColorStop(1, "rgba(64,120,255,0)")
-      ctx.fillStyle = halo
-      ctx.beginPath()
-      ctx.arc(cx, cy, raio * 1.16, 0, Math.PI * 2)
-      ctx.fill()
-      const oceano = ctx.createRadialGradient(cx - raio * 0.35, cy - raio * 0.4, raio * 0.1, cx, cy, raio)
-      oceano.addColorStop(0, "#111a33")
-      oceano.addColorStop(1, "#070a14")
-      ctx.fillStyle = oceano
-      ctx.beginPath()
-      ctx.arc(cx, cy, raio, 0, Math.PI * 2)
-      ctx.fill()
-      ctx.strokeStyle = "rgba(255,255,255,0.22)"
-      ctx.lineWidth = 1
-      ctx.stroke()
 
       projecao.rotate(rotacao)
       ctx.beginPath()
