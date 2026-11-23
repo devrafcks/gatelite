@@ -18,7 +18,7 @@ import {
 } from "@tabler/icons-react"
 import { useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
-import { MapaTerra, type Sobreposicoes } from "@/components/mapa/mapa-terra"
+import { limiteDeZoom, MapaTerra, type Sobreposicoes } from "@/components/mapa/mapa-terra"
 import { BuscaRapida } from "@/components/site/busca-rapida"
 import { Cabecalho } from "@/components/site/navegacao"
 import { usePassagens } from "@/components/terra/use-passagens"
@@ -35,7 +35,6 @@ import dynamic from "next/dynamic"
 import { AbaImagem } from "./aba-imagem"
 import { AbaSatelites } from "./aba-satelites"
 
-// as abas menos usadas só baixam quando alguém abre
 const CarregandoAba = () => <div className="h-48 animate-pulse rounded-2xl bg-muted/60" />
 const AbaTempo = dynamic(() => import("./aba-tempo").then((m) => m.AbaTempo), { loading: CarregandoAba })
 const AbaEventos = dynamic(() => import("./aba-eventos").then((m) => m.AbaEventos), { loading: CarregandoAba })
@@ -52,7 +51,7 @@ const ATALHOS_DE_CAMADA: { id: IdCamada; rotulo: string }[] = [
   { id: "cor-noaa20", rotulo: "Cor real" },
   { id: "detalhe", rotulo: "Detalhe" },
   { id: "cor-terra", rotulo: "Manhã" },
-  { id: "hls", rotulo: "30 m" },
+  { id: "hls", rotulo: "Landsat" },
   { id: "infravermelho", rotulo: "Infravermelho" },
   { id: "noite", rotulo: "Noite" },
 ]
@@ -60,7 +59,6 @@ const ATALHOS_DE_CAMADA: { id: IdCamada; rotulo: string }[] = [
 export function Explorador() {
   const [e, setE] = useEstadoExplorar()
   const [agora, setAgora] = useState(() => Date.now())
-  // o dia mais recente com o mosaico inteiro: antes disso os blocos ainda vêm escuros
   const ontem = dataCompleta(new Date(agora))
   const data = e.data ?? ontem
   const lugar = useMemo(() => ({ lat: e.lat, lng: e.lng }), [e.lat, e.lng])
@@ -74,7 +72,6 @@ export function Explorador() {
   const remover = useLugaresSalvos((s) => s.remover)
   const salvo = estaSalvo(lugares, e.lat, e.lng)
 
-  // as passagens andam com o relógio
   useEffect(() => {
     const id = setInterval(() => setAgora(Date.now()), 5 * 60_000)
     return () => clearInterval(id)
@@ -88,25 +85,39 @@ export function Explorador() {
     setVisao({ centro: { lat, lng }, zoom })
   }
 
-  // ponto tocado no mapa ganha um nome (bairro, cidade) em vez de "ponto escolhido"
   const nomeDoPonto = useNomeDoPonto(e.nome ? null : lugar)
   const titulo = e.nome ?? nomeDoPonto.data ?? "Ponto no mapa"
 
-  // trocar de camada: o mosaico detalhado só faz sentido de perto
   const trocarCamada = (id: IdCamada) => {
     setE({ camada: id })
-    if (CAMADAS[id].blocos && e.z < 13) setVisao({ centro: lugar, zoom: 16 })
-    else if (!CAMADAS[id].blocos && e.z > 12.5) setVisao({ centro: lugar, zoom: 11 })
+    const c = CAMADAS[id]
+    if (c.blocos && e.z < 13) setVisao({ centro: lugar, zoom: 16 })
+    else if (!c.blocos && e.z > limiteDeZoom(c)) setVisao({ centro: lugar, zoom: limiteDeZoom(c) - 0.5 })
   }
 
-  // escolher um dia da tira de 14 dias: volta para uma camada diária se preciso
+  const passouDoLimite = () => {
+    const anterior = CAMADAS[e.camada]
+    if (anterior.blocos) return
+    setE({ camada: "detalhe" })
+    toast(`${anterior.nome} não tem mais detalhe nesse zoom. Mostrando o mosaico detalhado.`, {
+      id: "limite-de-zoom",
+      action: {
+        label: "Voltar",
+        onClick: () => {
+          setE({ camada: anterior.id })
+          setVisao({ centro: lugar, zoom: limiteDeZoom(anterior) - 0.5 })
+        },
+      },
+    })
+  }
+
   const escolherDia = (dia: string) => {
     const c = CAMADAS[e.camada]
     setE({
       data: dia === ontem ? null : dia,
       ...(c.dataFixa || c.id === "hls" ? { camada: "cor-noaa20" as const } : {}),
     })
-    if (e.z > 12.5) setVisao({ centro: lugar, zoom: 10 })
+    if (e.z > 10) setVisao({ centro: lugar, zoom: 9.5 })
   }
 
   const selecionada = passagens.find((p) => p.id === e.passagem) ?? null
@@ -128,10 +139,8 @@ export function Explorador() {
     return {}
   }, [e.aba, selecionada, frota, eventos.data, filtro])
 
-  // ao escolher uma passagem, a câmera abre para mostrar a faixa inteira
   useEffect(() => {
     if (selecionada) setVisao({ centro: lugar, zoom: selecionada.sat.faixaKm > 1500 ? 3.4 : 5.2 })
-    // biome-ignore lint/correctness/useExhaustiveDependencies: só quando muda a passagem
   }, [selecionada?.id])
 
   const meEncontrar = () => {
@@ -175,6 +184,7 @@ export function Explorador() {
           setE({ lat: Number(p.lat.toFixed(4)), lng: Number(p.lng.toFixed(4)), nome: null, passagem: null })
         }
         aoMover={(_, z) => setE({ z: Number(z.toFixed(2)) })}
+        aoPassarDoLimite={passouDoLimite}
         aoClicarEvento={(id) => {
           const ev = eventos.data?.eventos.find((x) => x.id === id)
           if (ev) irPara(ev.lat, ev.lng, 8, ev.titulo)
@@ -182,7 +192,6 @@ export function Explorador() {
       />
       <Cabecalho sobreposto />
 
-      {/* barra de navegação sobre o mapa (desktop): o dia e as camadas mais usadas, sem abrir o painel */}
       <div
         className={cn(
           "absolute bottom-8 z-20 hidden -translate-x-1/2 items-center gap-1 rounded-2xl border border-white/10 bg-[#0b0e15]/85 p-1.5 text-sm text-white shadow-flutuante backdrop-blur-xl transition-[left] duration-300 lg:flex",
@@ -228,7 +237,6 @@ export function Explorador() {
         ))}
       </div>
 
-      {/* reabrir o painel quando ele está recolhido (desktop) */}
       {!painelVisivel && (
         <button
           type="button"
@@ -320,7 +328,6 @@ export function Explorador() {
               ))}
             </div>
           </div>
-          {/* abas: controle segmentado com a pílula ativa deslizando por baixo */}
           <nav
             aria-label="Abas"
             className="relative grid grid-cols-4 rounded-xl border border-white/[0.06] bg-black/30 p-1"

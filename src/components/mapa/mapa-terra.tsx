@@ -1,6 +1,6 @@
 "use client"
 
-import { IconCurrentLocation, IconMap2, IconMinus, IconPlus, IconWorld } from "@tabler/icons-react"
+import { IconCurrentLocation, IconMap2, IconMinus, IconPlus, IconWorld, IconZoomIn, IconZoomOut } from "@tabler/icons-react"
 import {
   type Map as MapaML,
   Map as MapLibre,
@@ -9,7 +9,6 @@ import {
   type StyleSpecification,
 } from "maplibre-gl"
 import { useEffect, useRef, useState } from "react"
-// o CSS do MapLibre só vem junto com o mapa (explorador), não em todas as páginas
 import "maplibre-gl/dist/maplibre-gl.css"
 import type { CategoriaEvento } from "@/domain/eventos"
 import type { LatLng } from "@/domain/geo"
@@ -28,7 +27,6 @@ export type Sobreposicoes = {
 
 type Props = {
   ponto?: LatLng | null
-  /** para onde a câmera vai quando o ponto muda (centro e zoom) */
   visao: { centro: LatLng; zoom: number }
   camada: Camada
   data: string
@@ -38,6 +36,7 @@ type Props = {
   aoMover?: (centro: LatLng, zoom: number) => void
   aoClicarEvento?: (id: string) => void
   aoClicarSatelite?: (id: string) => void
+  aoPassarDoLimite?: () => void
   className?: string
   controles?: boolean
   rotulos?: boolean
@@ -51,8 +50,6 @@ const ESTILO: StyleSpecification = {
   version: 8,
   projection: { type: "globe" },
   sources: {
-    // nomes de cidades, ruas e fronteiras por cima da imagem (fundo transparente). Os rótulos
-    // do próprio GIBS falham em metade dos blocos e alguns voltam opacos, em quadrados escuros.
     rotulos: {
       type: "raster",
       tiles: ["https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}"],
@@ -63,7 +60,6 @@ const ESTILO: StyleSpecification = {
     },
   },
   layers: [
-    // fundo transparente: o céu estrelado do contêiner aparece atrás do globo
     { id: "fundo", type: "background", paint: { "background-color": "#05060a", "background-opacity": 0 } },
   ],
   sky: {
@@ -74,7 +70,6 @@ const ESTILO: StyleSpecification = {
   },
 }
 
-// as fontes raster de uma camada (o fundo primeiro), para trocar sem recriar o mapa
 type Fonte = { id: string; url: string; maxzoom: number; atribuicao: string; principal: boolean }
 const fontesDaCamada = (camada: Camada, data: string): Fonte[] => {
   const da = (c: Camada, principal: boolean): Fonte[] =>
@@ -90,6 +85,8 @@ const fontesDaCamada = (camada: Camada, data: string): Fonte[] => {
   return [...(camada.fundo ? da(CAMADAS[camada.fundo], false) : []), ...da(camada, true)]
 }
 const ZOOM_MAXIMO = (c: Camada) => (c.blocos ? 19 : 13)
+const ZOOM_MINIMO = 1.2
+export const limiteDeZoom = (c: Camada) => (c.blocos ? 18.5 : c.nivelMaximo + 1.5)
 
 export function MapaTerra({
   ponto,
@@ -102,6 +99,7 @@ export function MapaTerra({
   aoMover,
   aoClicarEvento,
   aoClicarSatelite,
+  aoPassarDoLimite,
   className,
   controles = true,
   rotulos = true,
@@ -111,8 +109,11 @@ export function MapaTerra({
   const marcador = useRef<Marker | null>(null)
   const [pronto, setPronto] = useState(false)
   const [globo, setGlobo] = useState(true)
-  const cbs = useRef({ aoClicar, aoMover, aoClicarEvento, aoClicarSatelite })
-  cbs.current = { aoClicar, aoMover, aoClicarEvento, aoClicarSatelite }
+  const [zoomAtual, setZoomAtual] = useState(visao.zoom)
+  const cbs = useRef({ aoClicar, aoMover, aoClicarEvento, aoClicarSatelite, aoPassarDoLimite })
+  cbs.current = { aoClicar, aoMover, aoClicarEvento, aoClicarSatelite, aoPassarDoLimite }
+  const camadaAtual = useRef(camada)
+  camadaAtual.current = camada
   const idsAtivos = useRef<string[]>([])
 
   useEffect(() => {
@@ -122,9 +123,9 @@ export function MapaTerra({
       style: ESTILO,
       center: [visao.centro.lng, visao.centro.lat],
       zoom: Math.min(2.4, visao.zoom),
+      minZoom: ZOOM_MINIMO,
       maxZoom: ZOOM_MAXIMO(camada),
       attributionControl: { compact: true },
-      // desempenho: densidade de pixels limitada e sem MSAA (o raster não precisa)
       canvasContextAttributes: { alpha: true, antialias: false, powerPreference: "high-performance" } as never,
       pixelRatio: Math.min(window.devicePixelRatio || 1, 1.5),
       renderWorldCopies: false,
@@ -132,7 +133,6 @@ export function MapaTerra({
     })
     mapa.current = m
 
-    // blocos sem dado (oceano, fora da cobertura) voltam 500 do GIBS: não desenha e não polui o console
     m.on("error", (e) => {
       const msg = String((e as { error?: { message?: string } }).error?.message ?? "")
       if (!/AJAXError|Failed to fetch|(5dd)|(404)/.test(msg)) console.error(e.error)
@@ -219,6 +219,18 @@ export function MapaTerra({
         const c = m.getCenter()
         cbs.current.aoMover?.({ lat: c.lat, lng: c.lng }, m.getZoom())
       })
+      let quadroZoom = 0
+      m.on("zoom", () => {
+        if (quadroZoom) return
+        quadroZoom = requestAnimationFrame(() => {
+          quadroZoom = 0
+          setZoomAtual(m.getZoom())
+        })
+      })
+      m.on("zoomend", () => {
+        const c = camadaAtual.current
+        if (!c.blocos && m.getZoom() > limiteDeZoom(c)) cbs.current.aoPassarDoLimite?.()
+      })
       setPronto(true)
       m.flyTo({ center: [visao.centro.lng, visao.centro.lat], zoom: visao.zoom, duration: 2400, essential: true })
     })
@@ -227,10 +239,8 @@ export function MapaTerra({
       m.remove()
       mapa.current = null
     }
-    // biome-ignore lint/correctness/useExhaustiveDependencies: o mapa nasce uma vez
   }, [])
 
-  // troca as camadas do dia (e a data) sem recriar o mapa
   useEffect(() => {
     const m = mapa.current
     if (!m || !pronto) return
@@ -239,7 +249,6 @@ export function MapaTerra({
       if (m.getSource(id)) m.removeSource(id)
     }
     const novos: string[] = []
-    // as camadas do dia ficam por baixo da sombra da noite e das sobreposições
     const antesDe = m.getLayer("faixas") ? "faixas" : undefined
     for (const f of fontesDaCamada(camada, data)) {
       m.addSource(f.id, { type: "raster", tiles: [f.url], tileSize: 256, maxzoom: f.maxzoom, attribution: f.atribuicao })
@@ -251,9 +260,9 @@ export function MapaTerra({
           paint: {
             "raster-opacity": f.principal ? opacidade : 1,
             "raster-fade-duration": 150,
-            // o mosaico detalhado já vem tratado; só os diários ganham um pouco de contraste
-            "raster-contrast": camada.blocos ? 0 : 0.12,
-            "raster-saturation": camada.blocos ? 0 : 0.12,
+            "raster-contrast": camada.blocos ? 0 : 0.16,
+            "raster-saturation": camada.blocos ? 0 : 0.2,
+            "raster-resampling": "linear",
           },
         },
         antesDe,
@@ -268,7 +277,6 @@ export function MapaTerra({
       }
     }
     idsAtivos.current = novos
-    // biome-ignore lint/correctness/useExhaustiveDependencies: opacidade é ajustada no efeito abaixo
   }, [camada, data, pronto, rotulos])
 
   useEffect(() => {
@@ -279,7 +287,6 @@ export function MapaTerra({
     }
   }, [opacidade, camada, pronto])
 
-  // a câmera segue a visão pedida (ponto novo, evento, passagem)
   const ultimaVisao = useRef(visao)
   useEffect(() => {
     const m = mapa.current
@@ -293,7 +300,6 @@ export function MapaTerra({
     if (mudou) m.flyTo({ center: [visao.centro.lng, visao.centro.lat], zoom: visao.zoom, duration: 1600, essential: true })
   }, [visao, pronto])
 
-  // marcador do lugar
   useEffect(() => {
     const m = mapa.current
     if (!m) return
@@ -312,7 +318,6 @@ export function MapaTerra({
     }
   }, [ponto])
 
-  // sobreposições
   useEffect(() => {
     const m = mapa.current
     if (!m || !pronto) return
@@ -357,50 +362,89 @@ export function MapaTerra({
   }, [sobreposicoes, pronto])
 
   const zoom = (d: number) => mapa.current?.easeTo({ zoom: (mapa.current?.getZoom() ?? 5) + d, duration: 300 })
+  const centro = () => (ponto ? ([ponto.lng, ponto.lat] as [number, number]) : mapa.current?.getCenter())
+  const maximo = limiteDeZoom(camada)
+  const fracao = Math.max(0, Math.min(1, (zoomAtual - ZOOM_MINIMO) / (ZOOM_MAXIMO(camada) - ZOOM_MINIMO)))
+  const alternarProjecao = () => {
+    const m = mapa.current
+    if (!m) return
+    m.setProjection({ type: globo ? "mercator" : "globe" })
+    setGlobo(!globo)
+    if (m.getZoom() > 3) m.easeTo({ zoom: 2.2, duration: 900 })
+  }
 
   return (
     <div className={cn("estrelas relative h-full w-full overflow-hidden bg-[#05060a]", className)}>
-      {/* posição inline: o CSS do MapLibre força position: relative no contêiner */}
       <div ref={elemento} style={{ position: "absolute", inset: 0 }} role="application" aria-label="Mapa de imagens de satélite" />
-      {/* vinheta: escurece as bordas e dá profundidade ao globo */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
         style={{ background: "radial-gradient(120% 90% at 50% 45%, transparent 55%, rgb(5 6 10 / 0.65) 100%)" }}
       />
       {controles && (
-        <div className="absolute top-1/2 right-3 z-10 flex -translate-y-1/2 flex-col gap-1 rounded-xl border border-white/10 bg-black/50 p-1 text-white backdrop-blur-md md:right-5">
-          {[
-            { rotulo: "Aproximar", icone: IconPlus, acao: () => zoom(1) },
-            { rotulo: "Afastar", icone: IconMinus, acao: () => zoom(-1) },
-            {
-              rotulo: "Voltar ao lugar",
-              icone: IconCurrentLocation,
-              acao: () =>
-                ponto && mapa.current?.flyTo({ center: [ponto.lng, ponto.lat], zoom: Math.max(8, mapa.current.getZoom()), duration: 1200 }),
-            },
-            {
-              rotulo: globo ? "Ver plano" : "Ver globo",
-              icone: globo ? IconMap2 : IconWorld,
-              acao: () => {
-                mapa.current?.setProjection({ type: globo ? "mercator" : "globe" })
-                setGlobo(!globo)
-              },
-            },
-          ].map(({ rotulo, icone: Icone, acao }) => (
-            <button
-              key={rotulo}
-              type="button"
-              onClick={acao}
-              aria-label={rotulo}
-              title={rotulo}
-              className="grid size-10 place-items-center rounded-xl transition-colors hover:bg-white/15"
-            >
-              <Icone className="size-[18px]" stroke={1.5} />
-            </button>
-          ))}
+        <div className="absolute top-1/2 right-3 z-10 flex -translate-y-1/2 flex-col items-center gap-1 rounded-xl border border-white/10 bg-[#0b0e15]/80 p-1 text-white shadow-flutuante backdrop-blur-md md:right-5">
+          <BotaoDoMapa rotulo="Aproximar" onClick={() => zoom(1)} disabled={zoomAtual >= ZOOM_MAXIMO(camada) - 0.01}>
+            <IconPlus className="size-[18px]" stroke={1.5} />
+          </BotaoDoMapa>
+          <div
+            className="relative my-1 h-20 w-1 overflow-hidden rounded-full bg-white/10"
+            role="meter"
+            aria-label="Nível de zoom"
+            aria-valuemin={ZOOM_MINIMO}
+            aria-valuemax={ZOOM_MAXIMO(camada)}
+            aria-valuenow={Number(zoomAtual.toFixed(1))}
+          >
+            <span
+              className="absolute inset-x-0 bottom-0 origin-bottom rounded-full bg-white transition-transform duration-150"
+              style={{ height: "100%", transform: `scaleY(${fracao})` }}
+            />
+          </div>
+          <span className="numero text-[10px] text-white/60">{zoomAtual.toFixed(0)}</span>
+          <BotaoDoMapa rotulo="Afastar" onClick={() => zoom(-1)} disabled={zoomAtual <= ZOOM_MINIMO + 0.01}>
+            <IconMinus className="size-[18px]" stroke={1.5} />
+          </BotaoDoMapa>
+          <span className="my-0.5 h-px w-6 bg-white/10" aria-hidden />
+          <BotaoDoMapa
+            rotulo="Zoom máximo desta camada"
+            onClick={() => {
+              const c = centro()
+              if (c) mapa.current?.flyTo({ center: c, zoom: camada.blocos ? 18 : maximo - 0.5, duration: 1600 })
+            }}
+          >
+            <IconZoomIn className="size-[18px]" stroke={1.5} />
+          </BotaoDoMapa>
+          <BotaoDoMapa rotulo="Ver o planeta inteiro" onClick={() => mapa.current?.flyTo({ zoom: 1.6, duration: 1600 })}>
+            <IconZoomOut className="size-[18px]" stroke={1.5} />
+          </BotaoDoMapa>
+          <BotaoDoMapa
+            rotulo="Voltar ao lugar"
+            onClick={() => ponto && mapa.current?.flyTo({ center: [ponto.lng, ponto.lat], zoom: Math.max(8, Math.min(maximo - 0.5, mapa.current.getZoom())), duration: 1200 })}
+          >
+            <IconCurrentLocation className="size-[18px]" stroke={1.5} />
+          </BotaoDoMapa>
+          <BotaoDoMapa rotulo={globo ? "Ver em mapa plano" : "Ver em globo"} onClick={alternarProjecao}>
+            {globo ? <IconMap2 className="size-[18px]" stroke={1.5} /> : <IconWorld className="size-[18px]" stroke={1.5} />}
+          </BotaoDoMapa>
         </div>
       )}
     </div>
+  )
+}
+
+function BotaoDoMapa({
+  rotulo,
+  children,
+  ...props
+}: { rotulo: string; children: React.ReactNode } & React.ButtonHTMLAttributes<HTMLButtonElement>) {
+  return (
+    <button
+      type="button"
+      aria-label={rotulo}
+      title={rotulo}
+      className="grid size-10 place-items-center rounded-xl transition-colors hover:bg-white/15 disabled:pointer-events-none disabled:opacity-30"
+      {...props}
+    >
+      {children}
+    </button>
   )
 }
