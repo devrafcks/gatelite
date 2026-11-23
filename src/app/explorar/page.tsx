@@ -1,6 +1,8 @@
 import type { Metadata } from "next"
+import { NuqsAdapter } from "nuqs/adapters/next/app"
 import { Suspense } from "react"
 import { CarregadorDoExplorador, TelaDeCarregamento } from "@/components/explorar/carregador"
+import { TooltipProvider } from "@/components/ui/tooltip"
 
 export const metadata: Metadata = {
   alternates: { canonical: "/explorar" },
@@ -12,8 +14,12 @@ export const metadata: Metadata = {
 
 export default function PaginaExplorar() {
   return (
-    <Suspense fallback={<TelaDeCarregamento />}>
-      <CarregadorDoExplorador />
-    </Suspense>
+    <NuqsAdapter>
+      <TooltipProvider>
+        <Suspense fallback={<TelaDeCarregamento />}>
+          <CarregadorDoExplorador />
+        </Suspense>
+      </TooltipProvider>
+    </NuqsAdapter>
   )
 }

@@ -1,23 +1,19 @@
 "use client"
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { NuqsAdapter } from "nuqs/adapters/next/app"
+import dynamic from "next/dynamic"
 import { useState } from "react"
-import { Toaster } from "@/components/ui/sonner"
-import { TooltipProvider } from "@/components/ui/tooltip"
+
+const Toaster = dynamic(() => import("@/components/ui/sonner").then((m) => m.Toaster), { ssr: false })
 
 export function Provedores({ children }: { children: React.ReactNode }) {
   const [cliente] = useState(
     () => new QueryClient({ defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: false } } }),
   )
   return (
-      <NuqsAdapter>
-        <QueryClientProvider client={cliente}>
-          <TooltipProvider>
-            {children}
-            <Toaster position="top-center" />
-          </TooltipProvider>
-        </QueryClientProvider>
-      </NuqsAdapter>
+    <QueryClientProvider client={cliente}>
+      {children}
+      <Toaster position="top-center" />
+    </QueryClientProvider>
   )
 }
