@@ -1,180 +1,131 @@
 "use client"
 
-import { AnimatePresence, motion } from "motion/react"
 import dynamic from "next/dynamic"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import { Logotipo, Simbolo } from "@/components/brand/logo"
 
-// A abertura: toda vez que alguém entra no site, um amanhecer orbital de ~2 s cobre a
-// página enquanto ela termina de carregar. O gradiente respira como a atmosfera vista
-// de cima, o gato espera, a barra enche, e tudo sobe como uma cortina.
-// Navegar entre páginas não repete a abertura: ela vive no layout, que não remonta.
+// A abertura: só na primeira visita ao site, um amanhecer orbital de ~2 s cobre a página
+// enquanto ela termina de carregar. Quem volta não vê de novo: um script no começo do
+// <body> lê a marca no aparelho e esconde a abertura antes da primeira pintura.
+// Tudo em CSS (transform e opacity): nada de biblioteca de animação no pacote do site.
 
-// o player do gato (com WASM) chega depois: a abertura pinta na hora, o gato entra em seguida
+// o player do gato (com WASM) só baixa quando a abertura vai aparecer de fato
 const DotLottieReact = dynamic(() => import("@lottiefiles/dotlottie-react").then((m) => m.DotLottieReact), {
   ssr: false,
   loading: () => null,
 })
 
+export const CHAVE_ABERTURA = "gatelite-abertura"
+// roda antes de pintar: marca o <html> para o CSS esconder a abertura de quem já viu
+export const SCRIPT_ABERTURA = `try{if(localStorage.getItem("${CHAVE_ABERTURA}"))document.documentElement.dataset.abertura="vista"}catch(e){}`
+
 const DURACAO_MS = 2200
 const DURACAO_REDUZIDA_MS = 700
-
+const SAIDA_MS = 850
 const FRASES = ["Apontando os satélites…", "Revelando a foto de hoje…", "Calculando as órbitas…", "Quase lá…"]
 
-// o horizonte da Terra visto da órbita: noite no topo, a linha do Sol embaixo
-const CORES = ["#08090d", "#0c1124", "#1b2a66", "#2b5bd7", "#ff5a1f", "#ffb547", "#fff1d6"]
-const PARADAS = [38, 52, 62, 72, 82, 90, 100]
-
-function GradienteQueRespira({ respirar }: { respirar: boolean }) {
-  const caixa = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    let quadro = 0
-    let inicio: number | null = null
-    const paradas = PARADAS.map((p, i) => `${CORES[i]} ${p}%`).join(", ")
-    const pintar = (agora: number) => {
-      inicio ??= agora
-      // respiração lenta: o raio do gradiente pulsa ±5 pontos, como o brilho da atmosfera
-      const r = 98 + (respirar ? Math.sin((agora - inicio) / 900) * 4 : 0)
-      if (caixa.current) caixa.current.style.background = `radial-gradient(${r}% ${r + 14}% at 50% 0%, ${paradas})`
-      quadro = requestAnimationFrame(pintar)
-    }
-    quadro = requestAnimationFrame(pintar)
-    return () => cancelAnimationFrame(quadro)
-  }, [respirar])
-  return (
-    <motion.div
-      className="absolute inset-0"
-      initial={{ opacity: 0, scale: 1.4 }}
-      animate={{ opacity: 1, scale: 1, transition: { duration: 1.6, ease: [0.25, 0.1, 0.25, 1] } }}
-    >
-      {/* o centro escuro fica no alto; as cores do anel aparecem embaixo, como o horizonte */}
-      <div ref={caixa} className="absolute inset-0" />
-    </motion.div>
-  )
-}
+type Fase = "entrando" | "saindo" | "fora"
 
 export function Abertura() {
-  const [visivel, setVisivel] = useState(true)
-  const [progresso, setProgresso] = useState(0)
+  const [fase, setFase] = useState<Fase>("entrando")
   const [frase, setFrase] = useState(0)
-  const [reduzido, setReduzido] = useState(false)
+  const [gato, setGato] = useState(false)
   const [gatoFalhou, setGatoFalhou] = useState(false)
 
   useEffect(() => {
-    // aba aberta em segundo plano não precisa de abertura: quando a pessoa chegar, a página já está pronta
-    if (document.visibilityState === "hidden") {
-      setVisivel(false)
+    const html = document.documentElement
+    const jaViu = html.dataset.abertura === "vista"
+    // aba aberta em segundo plano também não precisa: quando a pessoa chegar, já está pronta
+    if (jaViu || document.visibilityState === "hidden") {
+      setFase("fora")
       return
     }
-    const r = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false
-    setReduzido(r)
-    const total = r ? DURACAO_REDUZIDA_MS : DURACAO_MS
-    const html = document.documentElement
-    html.style.overflow = "hidden"
-    const inicio = performance.now()
-    let quadro = 0
-    const tick = (agora: number) => {
-      const p = Math.min(1, (agora - inicio) / total)
-      // a barra acelera no começo e respira no fim, como um download de verdade
-      setProgresso(1 - (1 - p) ** 2.2)
-      setFrase(Math.min(FRASES.length - 1, Math.floor(p * FRASES.length)))
-      if (p < 1) quadro = requestAnimationFrame(tick)
+    try {
+      localStorage.setItem(CHAVE_ABERTURA, "1")
+    } catch {
+      // sem armazenamento (aba anônima bloqueada): mostra só desta vez
     }
-    quadro = requestAnimationFrame(tick)
+    setGato(true)
+    const reduzido = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false
+    const total = reduzido ? DURACAO_REDUZIDA_MS : DURACAO_MS
+    html.style.overflow = "hidden"
+
+    const passo = total / FRASES.length
+    const frases = setInterval(() => setFrase((f) => Math.min(FRASES.length - 1, f + 1)), passo)
+    let cancelado = false
+    let saida: ReturnType<typeof setTimeout> | undefined
+    const sair = () => {
+      if (cancelado) return
+      cancelado = true
+      setFase("saindo")
+      html.style.overflow = ""
+      saida = setTimeout(() => setFase("fora"), reduzido ? 300 : SAIDA_MS)
+    }
     // só sai quando o tempo mínimo passou E a página terminou de carregar
     const pronto = new Promise<void>((ok) => {
       if (document.readyState === "complete") ok()
       else window.addEventListener("load", () => ok(), { once: true })
     })
     const minimo = new Promise<void>((ok) => setTimeout(ok, total))
-    let cancelado = false
-    Promise.all([pronto, minimo]).then(() => !cancelado && setVisivel(false))
+    Promise.all([pronto, minimo]).then(sair)
     // trava de segurança: nunca prende ninguém mais que 5 s
-    const limite = setTimeout(() => !cancelado && setVisivel(false), 5000)
+    const limite = setTimeout(sair, 5000)
     return () => {
       cancelado = true
-      cancelAnimationFrame(quadro)
+      clearInterval(frases)
       clearTimeout(limite)
+      clearTimeout(saida)
       html.style.overflow = ""
     }
   }, [])
 
+  if (fase === "fora") return null
+
   return (
-    <AnimatePresence onExitComplete={() => (document.documentElement.style.overflow = "")}>
-      {visivel && (
-        <motion.div
-          key="abertura"
-          role="status"
-          aria-live="polite"
-          aria-label="Carregando o Gatélite"
-          className="fixed inset-0 z-[100] flex flex-col items-center justify-center overflow-hidden bg-[#08090d] text-white"
-          exit={
-            reduzido
-              ? { opacity: 0, transition: { duration: 0.3 } }
-              : { clipPath: "inset(0 0 100% 0)", transition: { duration: 0.85, ease: [0.76, 0, 0.24, 1] } }
-          }
-          style={{ clipPath: "inset(0 0 0% 0)" }}
-        >
-          <GradienteQueRespira respirar={!reduzido} />
+    <div
+      role="status"
+      aria-live="polite"
+      aria-label="Carregando o Gatélite"
+      data-fase={fase}
+      className="abertura fixed inset-0 z-[100] flex flex-col items-center justify-center overflow-hidden bg-[#08090d] text-white"
+    >
+      {/* o horizonte da Terra visto da órbita: noite no topo, a linha do Sol embaixo */}
+      <div className="abertura__ceu absolute inset-0" aria-hidden />
+      <div className="estrelas pointer-events-none absolute inset-0 opacity-60" aria-hidden />
 
-          {/* estrelas finas por cima do gradiente */}
-          <div className="estrelas pointer-events-none absolute inset-0 opacity-60" aria-hidden />
-
-          <motion.div
-            className="relative z-10 flex flex-col items-center px-6 text-center"
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0, transition: { duration: 0.8, delay: 0.25, ease: [0.22, 1, 0.36, 1] } }}
-            exit={{ opacity: 0, y: -24, transition: { duration: 0.4 } }}
-          >
-            <div className="h-[132px] w-[185px] sm:h-[160px] sm:w-[224px]" aria-hidden>
-              {gatoFalhou ? (
-                <div className="grid h-full place-items-center">
-                  <Simbolo className="size-20 text-white" titulo="" />
-                </div>
-              ) : (
-                <DotLottieReact
-                  src="/dados/gato-carregando.json"
-                  loop
-                  autoplay={!reduzido}
-                  dotLottieRefCallback={(d) => d?.addEventListener("loadError", () => setGatoFalhou(true))}
-                />
-              )}
+      <div className="abertura__conteudo relative z-10 flex flex-col items-center px-6 text-center">
+        <div className="h-[132px] w-[185px] sm:h-[160px] sm:w-[224px]" aria-hidden>
+          {gato && !gatoFalhou ? (
+            <DotLottieReact
+              src="/dados/gato-carregando.json"
+              loop
+              autoplay
+              dotLottieRefCallback={(d) => d?.addEventListener("loadError", () => setGatoFalhou(true))}
+            />
+          ) : (
+            <div className="grid h-full place-items-center">
+              <Simbolo className="size-20 text-white" titulo="" />
             </div>
+          )}
+        </div>
 
-            <div className="mt-4 flex items-center gap-2.5 text-white">
-              <Simbolo className="size-7" titulo="" />
-              <Logotipo className="h-[18px]" />
-            </div>
+        <div className="mt-4 flex items-center gap-2.5 text-white">
+          <Simbolo className="size-7" titulo="" />
+          <Logotipo className="h-[18px]" />
+        </div>
 
-            <div className="mt-8 h-1 w-56 overflow-hidden rounded-full bg-white/15 sm:w-64">
-              <div
-                className="h-full origin-left rounded-full"
-                style={{
-                  transform: `scaleX(${progresso})`,
-                  background: "linear-gradient(90deg, #ffb547, #ff5a1f)",
-                }}
-              />
-            </div>
+        <div className="mt-8 h-1 w-56 overflow-hidden rounded-full bg-white/15 sm:w-64">
+          <div className="abertura__barra h-full origin-left rounded-full" />
+        </div>
 
-            <div className="mt-4 h-5 overflow-hidden text-sm text-white/75">
-              <AnimatePresence mode="wait">
-                <motion.p
-                  key={frase}
-                  initial={{ y: 14, opacity: 0, filter: "blur(4px)" }}
-                  animate={{ y: 0, opacity: 1, filter: "blur(0px)", transition: { duration: 0.35 } }}
-                  exit={{ y: -14, opacity: 0, filter: "blur(4px)", transition: { duration: 0.2 } }}
-                >
-                  {FRASES[frase]}
-                </motion.p>
-              </AnimatePresence>
-            </div>
-          </motion.div>
+        <p key={frase} className="abertura__frase mt-4 h-5 text-sm text-white/75">
+          {FRASES[frase]}
+        </p>
+      </div>
 
-          <p className="absolute bottom-6 z-10 px-6 text-center text-[11px] text-white/45">
-            A Terra de hoje, vista de cima · dados abertos da NASA
-          </p>
-        </motion.div>
-      )}
-    </AnimatePresence>
+      <p className="absolute bottom-6 z-10 px-6 text-center text-[11px] text-white/45">
+        A Terra de hoje, vista de cima · dados abertos da NASA
+      </p>
+    </div>
   )
 }

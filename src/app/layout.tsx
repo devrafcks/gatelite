@@ -1,10 +1,9 @@
 import type { Metadata, Viewport } from "next"
 import { Anybody, Geist, Geist_Mono } from "next/font/google"
-import { Abertura } from "@/components/site/abertura"
+import { Abertura, SCRIPT_ABERTURA } from "@/components/site/abertura"
 import { NavegacaoMovel } from "@/components/site/navegacao"
 import { Provedores } from "@/components/provedores"
 import { MARCA } from "@/lib/marca"
-import "maplibre-gl/dist/maplibre-gl.css"
 import "./globals.css"
 import "@/styles/rodape-orbital.css"
 import "@/styles/hero-orbital.css"
@@ -87,6 +86,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geist.variable} ${geistMono.variable} ${display.variable} dark h-full antialiased`}
     >
       <body className="min-h-full">
+        {/* antes de qualquer pintura: quem já viu a abertura não vê de novo */}
+        {/* biome-ignore lint/security/noDangerouslySetInnerHtml: script estático de uma linha */}
+        <script dangerouslySetInnerHTML={{ __html: SCRIPT_ABERTURA }} />
         {/* dados estruturados: o Google entende que é um aplicativo web gratuito, em português */}
         <script
           type="application/ld+json"
