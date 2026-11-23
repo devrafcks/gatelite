@@ -31,10 +31,14 @@ import { useEventos, useNomeDoPonto } from "@/lib/consultas"
 import { coordenada } from "@/lib/formato"
 import { estaSalvo, useLugaresSalvos } from "@/lib/lugares"
 import { cn } from "@/lib/utils"
-import { AbaEventos } from "./aba-eventos"
+import dynamic from "next/dynamic"
 import { AbaImagem } from "./aba-imagem"
 import { AbaSatelites } from "./aba-satelites"
-import { AbaTempo } from "./aba-tempo"
+
+// as abas menos usadas só baixam quando alguém abre
+const CarregandoAba = () => <div className="h-48 animate-pulse rounded-2xl bg-muted/60" />
+const AbaTempo = dynamic(() => import("./aba-tempo").then((m) => m.AbaTempo), { loading: CarregandoAba })
+const AbaEventos = dynamic(() => import("./aba-eventos").then((m) => m.AbaEventos), { loading: CarregandoAba })
 import { type Aba, useEstadoExplorar } from "./estado"
 
 const ABAS_UI: { id: Aba; rotulo: string; icone: typeof IconPhoto }[] = [
@@ -98,7 +102,10 @@ export function Explorador() {
   // escolher um dia da tira de 14 dias: volta para uma camada diária se preciso
   const escolherDia = (dia: string) => {
     const c = CAMADAS[e.camada]
-    setE({ data: dia === ontem ? null : dia, ...(c.dataFixa || c.id === "hls" ? { camada: "cor-noaa20" as const } : {}) })
+    setE({
+      data: dia === ontem ? null : dia,
+      ...(c.dataFixa || c.id === "hls" ? { camada: "cor-noaa20" as const } : {}),
+    })
     if (e.z > 12.5) setVisao({ centro: lugar, zoom: 10 })
   }
 
@@ -164,7 +171,9 @@ export function Explorador() {
         data={data}
         opacidade={opacidade}
         sobreposicoes={sobreposicoes}
-        aoClicar={(p) => setE({ lat: Number(p.lat.toFixed(4)), lng: Number(p.lng.toFixed(4)), nome: null, passagem: null })}
+        aoClicar={(p) =>
+          setE({ lat: Number(p.lat.toFixed(4)), lng: Number(p.lng.toFixed(4)), nome: null, passagem: null })
+        }
         aoMover={(_, z) => setE({ z: Number(z.toFixed(2)) })}
         aoClicarEvento={(id) => {
           const ev = eventos.data?.eventos.find((x) => x.id === id)
@@ -260,20 +269,27 @@ export function Explorador() {
           aria-expanded={aberto}
         >
           <span className="h-1.5 w-11 rounded-full bg-border" />
-          <IconChevronUp className={cn("mt-0.5 size-4 text-muted-foreground transition-transform", aberto && "rotate-180")} />
+          <IconChevronUp
+            className={cn("mt-0.5 size-4 text-muted-foreground transition-transform", aberto && "rotate-180")}
+          />
         </button>
 
-        <div className="space-y-3 px-4 pb-3 lg:pt-4 lg:pr-16">
-          <BuscaRapida
-            placeholder="Buscar um lugar"
-            aoEscolher={(l) => {
-              irPara(l.lat, l.lng, 10, l.nome)
-              setAberto(true)
-            }}
-          />
+        <div className="space-y-3 px-4 pb-3 lg:pt-4">
+          <div className="lg:pr-12">
+            <BuscaRapida
+              placeholder="Buscar um lugar"
+              aoEscolher={(l) => {
+                irPara(l.lat, l.lng, 10, l.nome)
+                setAberto(true)
+              }}
+            />
+          </div>
           <div className="flex items-center justify-between gap-2">
             <div className="min-w-0">
-              <h1 className="titulo-display line-clamp-2 text-[1.2rem] leading-tight font-medium text-balance" title={titulo}>
+              <h1
+                className="titulo-display line-clamp-2 text-[1.2rem] leading-tight font-medium text-balance"
+                title={titulo}
+              >
                 {titulo}
               </h1>
               <p className="numero truncate text-xs text-muted-foreground">{coordenada(e.lat, e.lng)}</p>
@@ -282,7 +298,11 @@ export function Explorador() {
               {[
                 { rotulo: "Minha localização", icone: IconCurrentLocation, acao: meEncontrar },
                 { rotulo: "Copiar link desta visão", icone: IconLink, acao: copiarLink },
-                { rotulo: salvo ? "Remover dos salvos" : "Salvar lugar", icone: salvo ? IconStarFilled : IconStar, acao: alternarSalvo },
+                {
+                  rotulo: salvo ? "Remover dos salvos" : "Salvar lugar",
+                  icone: salvo ? IconStarFilled : IconStar,
+                  acao: alternarSalvo,
+                },
               ].map(({ rotulo, icone: Icone, acao }) => (
                 <button
                   key={rotulo}
@@ -300,7 +320,23 @@ export function Explorador() {
               ))}
             </div>
           </div>
-          <nav aria-label="Abas" className="grid grid-cols-4 gap-1 rounded-xl bg-muted p-1">
+          {/* abas: controle segmentado com a pílula ativa deslizando por baixo */}
+          <nav
+            aria-label="Abas"
+            className="relative grid grid-cols-4 rounded-xl border border-white/[0.06] bg-black/30 p-1"
+          >
+            <span
+              aria-hidden
+              className="absolute inset-y-1 left-1 w-[calc((100%-0.5rem)/4)] rounded-lg bg-white/[0.09] shadow-[inset_0_1px_0_rgb(255_255_255/0.08)] transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+              style={{
+                transform: `translateX(${
+                  Math.max(
+                    0,
+                    ABAS_UI.findIndex((a) => a.id === e.aba),
+                  ) * 100
+                }%)`,
+              }}
+            />
             {ABAS_UI.map(({ id, rotulo, icone: Icone }) => (
               <button
                 key={id}
@@ -311,12 +347,12 @@ export function Explorador() {
                 }}
                 aria-current={e.aba === id ? "page" : undefined}
                 className={cn(
-                  "flex h-9 items-center justify-center gap-1.5 rounded-lg text-[13px] font-medium text-muted-foreground transition-colors",
-                  e.aba === id && "bg-primary text-primary-foreground",
+                  "relative z-10 flex h-9 min-w-0 items-center justify-center gap-1.5 rounded-lg px-1 text-[13px] font-medium text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-white/30",
+                  e.aba === id && "text-foreground",
                 )}
               >
-                <Icone className="size-4" stroke={1.5} />
-                <span className="hidden sm:inline">{rotulo}</span>
+                <Icone className={cn("size-4 shrink-0 transition-colors", e.aba === id && "text-sol")} stroke={1.5} />
+                <span className="hidden truncate sm:inline">{rotulo}</span>
               </button>
             ))}
           </nav>
@@ -353,7 +389,14 @@ export function Explorador() {
             />
           )}
           {e.aba === "tempo" && (
-            <AbaTempo lugar={lugar} zoom={e.z} data={data} ultimo={ontem} camada={e.camada} aoEscolherDia={escolherDia} />
+            <AbaTempo
+              lugar={lugar}
+              zoom={e.z}
+              data={data}
+              ultimo={ontem}
+              camada={e.camada}
+              aoEscolherDia={escolherDia}
+            />
           )}
           {e.aba === "eventos" && (
             <AbaEventos
