@@ -1,8 +1,9 @@
 "use client"
 
 import { IconPlayerPauseFilled, IconPlayerPlayFilled } from "@tabler/icons-react"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { type FotoEpic, urlDaFotoEpic } from "@/domain/epic"
+import { imagemOtimizada, preCarregar } from "@/lib/imagens"
 import { numero } from "@/lib/formato"
 import { cn } from "@/lib/utils"
 
@@ -24,6 +25,14 @@ export function GiroDaTerra({
   const [carregadas, setCarregadas] = useState<Set<number>>(() => new Set())
   const arraste = useRef<{ x: number; i: number } | null>(null)
   const n = fotos.length
+  // miniaturas já são leves; as fotos grandes passam pelo otimizador
+  const atributos = useMemo(
+    () =>
+      fotos.map((f) =>
+        tamanho === "thumbs" ? { src: urlDaFotoEpic(f, "thumbs"), srcSet: undefined, sizes: undefined } : imagemOtimizada(urlDaFotoEpic(f), "(min-width: 1024px) 40vw, 90vw"),
+      ),
+    [fotos, tamanho],
+  )
 
   useEffect(() => {
     setIndice(0)
@@ -32,12 +41,14 @@ export function GiroDaTerra({
 
   // pré-carrega todas; só anima depois que a seguinte estiver pronta
   useEffect(() => {
-    fotos.forEach((f, i) => {
-      const img = new Image()
-      img.onload = () => setCarregadas((s) => new Set(s).add(i))
-      img.src = urlDaFotoEpic(f, tamanho)
+    let cancelado = false
+    atributos.forEach((a, i) => {
+      void preCarregar(a).then(() => !cancelado && setCarregadas((s) => new Set(s).add(i)))
     })
-  }, [fotos, tamanho])
+    return () => {
+      cancelado = true
+    }
+  }, [atributos])
 
   useEffect(() => {
     if (!tocando || n < 2) return
@@ -78,7 +89,10 @@ export function GiroDaTerra({
           // biome-ignore lint/performance/noImgElement: imagens externas da NASA, já otimizadas
           <img
             key={f.id}
-            src={urlDaFotoEpic(f, tamanho)}
+            src={atributos[i]?.src}
+            srcSet={atributos[i]?.srcSet}
+            sizes={atributos[i]?.sizes}
+            decoding="async"
             alt=""
             draggable={false}
             loading={i === 0 ? "eager" : "lazy"}
