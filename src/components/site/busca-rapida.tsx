@@ -13,9 +13,6 @@ type Opcao = { nome: string; detalhe: string; lat: number; lng: number; origem: 
 const semAcento = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase()
 const mesmo = (a: Opcao, b: Opcao) => Math.abs(a.lat - b.lat) < 0.05 && Math.abs(a.lng - b.lng) < 0.05
 
-// Busca de lugares que responde na hora: lugares salvos e cidades conhecidas aparecem no
-// primeiro toque, sem rede; os resultados da busca de verdade chegam e se somam embaixo.
-// Setas para navegar, Enter para escolher, Esc para fechar.
 export function BuscaRapida({
   className,
   aoEscolher,
@@ -123,8 +120,7 @@ export function BuscaRapida({
           {opcoes.map((l, i) => {
             const Icone = l.origem === "salvo" ? IconStar : IconMapPin
             return (
-              // biome-ignore lint/a11y/useFocusableInteractive: o foco fica no campo (aria-activedescendant)
-              <div key={`${l.origem}-${l.lat},${l.lng}`} id={`${id}-${i}`} role="option" aria-selected={i === ativo}>
+              <div key={`${l.origem}-${l.lat},${l.lng}`} id={`${id}-${i}`} role="option" tabIndex={-1} aria-selected={i === ativo}>
                 <button
                   type="button"
                   onMouseDown={(e) => e.preventDefault()}

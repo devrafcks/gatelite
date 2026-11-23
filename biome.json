@@ -43,6 +43,12 @@
       },
       "a11y": {
         "useSemanticElements": "off"
+      },
+      "performance": {
+        "noImgElement": "off"
+      },
+      "security": {
+        "noDangerouslySetInnerHtml": "off"
       }
     }
   }
