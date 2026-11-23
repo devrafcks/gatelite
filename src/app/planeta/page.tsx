@@ -18,11 +18,12 @@ export const metadata: Metadata = {
 }
 
 // as estações: o mesmo planeta no solstício de junho e no de dezembro
-// VIIRS no lugar do MODIS: sem os vãos pretos entre as órbitas. Recorte longe dos polos,
-// onde a noite polar não tem imagem.
-const MUNDO = { sul: -58, norte: 72, oeste: -180, leste: 180 }
-const JUNHO = urlDaImagem("VIIRS_NOAA20_CorrectedReflectance_TrueColor", "2025-06-21", MUNDO, 1440, 520)
-const DEZEMBRO = urlDaImagem("VIIRS_NOAA20_CorrectedReflectance_TrueColor", "2025-12-21", MUNDO, 1440, 520)
+// VIIRS no lugar do MODIS: sem os vãos pretos entre as órbitas. O recorte (50° S a 55° N)
+// fica fora da noite polar dos dois solstícios: em dezembro o norte alto não tem Sol e em
+// junho o sul alto também, e esses trechos saíam como faixas pretas tortas.
+const MUNDO = { sul: -50, norte: 55, oeste: -180, leste: 180 }
+const JUNHO = urlDaImagem("VIIRS_NOAA20_CorrectedReflectance_TrueColor", "2025-06-21", MUNDO, 1440, 420)
+const DEZEMBRO = urlDaImagem("VIIRS_NOAA20_CorrectedReflectance_TrueColor", "2025-12-21", MUNDO, 1440, 420)
 
 export default function PaginaPlaneta() {
   return (
@@ -44,7 +45,7 @@ export default function PaginaPlaneta() {
       </div>
 
       <main className="mx-auto max-w-7xl space-y-28 px-4 py-20 md:px-6">
-        <section className="grid items-center gap-12 lg:grid-cols-12">
+        <section className="revelar grid items-center gap-12 lg:grid-cols-12">
           <div className="lg:col-span-5">
             <h2 className="titulo-display text-[clamp(2rem,4vw,3.4rem)] font-light">
               De 1,5 milhão de km, <span className="font-semibold">a Terra inteira.</span>
@@ -59,7 +60,7 @@ export default function PaginaPlaneta() {
           </div>
         </section>
 
-        <section>
+        <section className="revelar">
           <div className="mb-10 grid gap-6 lg:grid-cols-12 lg:items-end">
             <h2 className="titulo-display text-[clamp(2rem,4vw,3.4rem)] font-light lg:col-span-6">
               As estações <span className="font-semibold">numa cortina.</span>
@@ -69,11 +70,11 @@ export default function PaginaPlaneta() {
               que sobe e desce com o Sol.
             </p>
           </div>
-          <Cortina antes={JUNHO} depois={DEZEMBRO} rotuloAntes="21 jun 2025" rotuloDepois="21 dez 2025" proporcao="36 / 13" />
-          <p className="mt-3 text-xs text-muted-foreground">VIIRS/NOAA-20, cor real, de 58° S a 72° N.</p>
+          <Cortina antes={JUNHO} depois={DEZEMBRO} rotuloAntes="21 jun 2025" rotuloDepois="21 dez 2025" proporcao="24 / 7" />
+          <p className="mt-3 text-xs text-muted-foreground">VIIRS/NOAA-20, cor real, de 50° S a 55° N.</p>
         </section>
 
-        <section className="grid gap-10 lg:grid-cols-12">
+        <section className="revelar grid gap-10 lg:grid-cols-12">
           <div className="lg:col-span-4">
             <h2 className="titulo-display text-[clamp(2rem,4vw,3.2rem)] font-light">
               E mais longe, <span className="font-semibold">a foto do dia.</span>
@@ -87,7 +88,7 @@ export default function PaginaPlaneta() {
           </div>
         </section>
 
-        <section>
+        <section className="revelar">
           <h2 className="titulo-display mb-10 max-w-2xl text-[clamp(2rem,4vw,3.2rem)] font-light">
             O que está acontecendo <span className="font-semibold">agora.</span>
           </h2>
