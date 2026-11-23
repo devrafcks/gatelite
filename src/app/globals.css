@@ -490,3 +490,12 @@ html {
   background: rgb(255 90 31 / 0.35);
   color: #fff;
 }
+
+body:has(.sem-vidro) .vidro,
+body:has(.sem-vidro) [class*="backdrop-blur"] {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+body:has(.sem-vidro) .vidro {
+  background: rgb(11 14 21 / 0.9);
+}

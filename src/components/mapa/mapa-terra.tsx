@@ -130,7 +130,7 @@ export function MapaTerra({
       maxZoom: ZOOM_MAXIMO(camada),
       attributionControl: { compact: true },
       canvasContextAttributes: { alpha: true, antialias: false, powerPreference: "high-performance" } as never,
-      pixelRatio: Math.min(window.devicePixelRatio || 1, 1.5),
+      pixelRatio: Math.min(window.devicePixelRatio || 1, window.innerWidth < 768 ? 1 : 1.25),
       renderWorldCopies: false,
       fadeDuration: 60,
     })
@@ -382,13 +382,8 @@ export function MapaTerra({
   return (
     <div className={cn("estrelas relative h-full w-full overflow-hidden bg-[#05060a]", className)}>
       <div ref={elemento} style={{ position: "absolute", inset: 0 }} role="application" aria-label="Mapa de imagens de satélite" />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={{ background: "radial-gradient(120% 90% at 50% 45%, transparent 55%, rgb(5 6 10 / 0.65) 100%)" }}
-      />
       {controles && (
-        <div className="absolute top-1/2 right-3 z-10 flex -translate-y-1/2 flex-col items-center gap-1 rounded-xl border border-white/10 bg-[#0b0e15]/80 p-1 text-white shadow-flutuante backdrop-blur-md md:right-5">
+        <div className="absolute top-1/2 right-3 z-10 flex -translate-y-1/2 flex-col items-center gap-1 rounded-xl border border-white/10 bg-[#0b0e15]/80 p-1 text-white shadow-flutuante md:right-5">
           <BotaoDoMapa rotulo="Aproximar" onClick={() => zoom(1)} disabled={zoomAtual >= ZOOM_MAXIMO(camada) - 0.01}>
             <IconPlus className="size-[18px]" stroke={1.5} />
           </BotaoDoMapa>

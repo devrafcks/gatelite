@@ -172,7 +172,7 @@ export function Explorador() {
   }
 
   return (
-    <div className="fixed inset-0 overflow-hidden bg-[#05060a]">
+    <div className="sem-vidro fixed inset-0 overflow-hidden bg-[#05060a]">
       <MapaTerra
         ponto={lugar}
         visao={visao}
@@ -194,7 +194,7 @@ export function Explorador() {
 
       <div
         className={cn(
-          "absolute bottom-8 z-20 hidden -translate-x-1/2 items-center gap-1 rounded-2xl border border-white/10 bg-[#0b0e15]/85 p-1.5 text-sm text-white shadow-flutuante backdrop-blur-xl transition-[left] duration-300 lg:flex",
+          "absolute bottom-8 z-20 hidden -translate-x-1/2 items-center gap-1 rounded-2xl border border-white/10 bg-[#0b0e15]/85 p-1.5 text-sm text-white shadow-flutuante transition-[left] duration-300 lg:flex",
           painelVisivel ? "left-[calc(50%+13.5rem)]" : "left-1/2",
         )}
       >
@@ -241,7 +241,7 @@ export function Explorador() {
         <button
           type="button"
           onClick={() => setPainelVisivel(true)}
-          className="absolute top-20 left-4 z-30 hidden h-11 items-center gap-2 rounded-xl border border-white/10 bg-[#0b0e15]/85 pr-4 pl-3 text-sm text-white shadow-flutuante backdrop-blur-xl hover:bg-[#151a24] lg:flex"
+          className="absolute top-20 left-4 z-30 hidden h-11 items-center gap-2 rounded-xl border border-white/10 bg-[#0b0e15]/85 pr-4 pl-3 text-sm text-white shadow-flutuante hover:bg-[#151a24] lg:flex"
           aria-label="Mostrar o painel"
         >
           <IconLayoutSidebarLeftExpand className="size-[18px]" stroke={1.5} />
