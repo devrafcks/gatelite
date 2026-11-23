@@ -54,7 +54,7 @@ const ESTILO: StyleSpecification = {
       type: "raster",
       tiles: ["https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}"],
       tileSize: 256,
-      minzoom: 3,
+      minzoom: 4,
       maxzoom: 19,
       attribution: "Rótulos: Esri",
     },
@@ -66,7 +66,7 @@ const ESTILO: StyleSpecification = {
     "sky-color": "rgba(5, 6, 10, 0)",
     "horizon-color": "rgba(64, 120, 255, 0.55)",
     "fog-color": "rgba(10, 18, 40, 0.6)",
-    "atmosphere-blend": ["interpolate", ["linear"], ["zoom"], 0, 1, 4, 0.9, 7, 0],
+    "atmosphere-blend": ["interpolate", ["linear"], ["zoom"], 0, 1, 3, 0.8, 5, 0],
   },
 }
 
@@ -279,7 +279,7 @@ export function MapaTerra({
     if (rotulos) {
       for (const r of ["rotulos"]) {
         if (m.getLayer(r)) m.removeLayer(r)
-        m.addLayer({ id: r, type: "raster", source: r, paint: { "raster-opacity": 0.75 } }, "faixas")
+        m.addLayer({ id: r, type: "raster", source: r, paint: { "raster-opacity": 0.75, "raster-fade-duration": 0 } }, "faixas")
       }
     }
     idsAtivos.current = novos
