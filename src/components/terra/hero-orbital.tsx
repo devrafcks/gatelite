@@ -1,7 +1,8 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { type FotoEpic, urlDaFotoEpic } from "@/domain/epic"
+import { imagemOtimizada, preCarregar } from "@/lib/imagens"
 import { numero } from "@/lib/formato"
 import { cn } from "@/lib/utils"
 
@@ -12,6 +13,8 @@ import { cn } from "@/lib/utils"
 
 const limitar = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v))
 const suave = (t: number) => t * t * (3 - 2 * t)
+// a Terra ocupa metade da largura no desktop e quase tudo no celular
+const TAMANHOS = "(min-width: 1024px) 50vw, 92vw"
 
 export function HeroOrbital({
   fotos,
@@ -30,6 +33,7 @@ export function HeroOrbital({
   const [prontas, setProntas] = useState<Set<number>>(() => new Set())
   const [reduzido, setReduzido] = useState(false)
   const n = fotos.length
+  const atributos = useMemo(() => fotos.map((f) => imagemOtimizada(urlDaFotoEpic(f), TAMANHOS)), [fotos])
 
   useEffect(() => setReduzido(window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false), [])
 
@@ -39,15 +43,8 @@ export function HeroOrbital({
     const carregar = async () => {
       for (let i = 0; i < fotos.length; i++) {
         if (cancelado) return
-        await new Promise<void>((ok) => {
-          const img = new Image()
-          img.decoding = "async"
-          img.onload = img.onerror = () => {
-            if (!cancelado) setProntas((s) => new Set(s).add(i))
-            ok()
-          }
-          img.src = urlDaFotoEpic(fotos[i] as FotoEpic)
-        })
+        await preCarregar(atributos[i] as ReturnType<typeof imagemOtimizada>)
+        if (!cancelado) setProntas((s) => new Set(s).add(i))
       }
     }
     const ocioso = (window as Window & { requestIdleCallback?: (f: () => void) => number }).requestIdleCallback
@@ -56,7 +53,7 @@ export function HeroOrbital({
     return () => {
       cancelado = true
     }
-  }, [fotos])
+  }, [atributos])
 
   useEffect(() => {
     if (reduzido) return
@@ -72,6 +69,8 @@ export function HeroOrbital({
       const r = el.getBoundingClientRect()
       const curso = Math.max(1, r.height - window.innerHeight)
       alvo = limitar(-r.top / curso)
+      // o laço só roda enquanto há movimento: parado, não gasta nada
+      if (!raf) raf = requestAnimationFrame(pintar)
     }
     const pintar = () => {
       mostrado += (alvo - mostrado) * 0.14
@@ -95,12 +94,11 @@ export function HeroOrbital({
         ultimoQuadro = q
         setQuadro(q)
       }
-      raf = requestAnimationFrame(pintar)
+      raf = mostrado === alvo ? 0 : requestAnimationFrame(pintar)
     }
     ler()
     addEventListener("scroll", ler, { passive: true })
     addEventListener("resize", ler)
-    raf = requestAnimationFrame(pintar)
     return () => {
       cancelAnimationFrame(raf)
       removeEventListener("scroll", ler)
@@ -123,23 +121,31 @@ export function HeroOrbital({
         {/* a Terra: começa à direita, vem para o centro e cresce */}
         <div className="hero-orbital__terra" aria-hidden={false}>
           <div className="relative aspect-square w-full overflow-hidden rounded-full">
-            {fotos.map((f, i) =>
-              i !== 0 && !prontas.has(i) ? null : (
-              // biome-ignore lint/performance/noImgElement: imagens externas da NASA
-              <img
-                key={f.id}
-                src={urlDaFotoEpic(f)}
-                alt={i === quadro ? `A Terra fotografada pela câmera EPIC às ${f.data.slice(11, 16)} UTC de ${f.data.slice(0, 10)}` : ""}
-                className={cn(
-                  // troca seca, quadro a quadro: é um scrub, não um slideshow
-                  "absolute inset-0 h-full w-full scale-[1.2] object-cover",
-                  i === (prontas.has(quadro) ? quadro : 0) ? "opacity-100" : "opacity-0",
-                )}
-                draggable={false}
-                fetchPriority={i === 0 ? "high" : "low"}
-              />
-              ),
-            )}
+            {fotos.map((f, i) => {
+              // no DOM só a foto da vez e as vizinhas (já baixadas): 13 fotos decodificadas
+              // ao mesmo tempo pesavam dezenas de MB de memória de vídeo
+              const visivel = prontas.has(quadro) ? quadro : 0
+              if (i !== 0 && (!prontas.has(i) || Math.abs(i - visivel) > 1)) return null
+              const a = atributos[i]
+              return (
+                // biome-ignore lint/performance/noImgElement: imagens externas da NASA, já otimizadas
+                <img
+                  key={f.id}
+                  src={a?.src}
+                  srcSet={a?.srcSet}
+                  sizes={a?.sizes}
+                  alt={i === quadro ? `A Terra fotografada pela câmera EPIC às ${f.data.slice(11, 16)} UTC de ${f.data.slice(0, 10)}` : ""}
+                  className={cn(
+                    // troca seca, quadro a quadro: é um scrub, não um slideshow
+                    "absolute inset-0 h-full w-full scale-[1.2] object-cover",
+                    i === visivel ? "opacity-100" : "opacity-0",
+                  )}
+                  draggable={false}
+                  decoding={i === 0 ? "sync" : "async"}
+                  fetchPriority={i === 0 ? "high" : "low"}
+                />
+              )
+            })}
           </div>
           {foto && (
             <p className="hero-orbital__legenda numero">
