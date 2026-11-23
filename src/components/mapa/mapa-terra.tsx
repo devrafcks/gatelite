@@ -9,6 +9,8 @@ import {
   type StyleSpecification,
 } from "maplibre-gl"
 import { useEffect, useRef, useState } from "react"
+// o CSS do MapLibre só vem junto com o mapa (explorador), não em todas as páginas
+import "maplibre-gl/dist/maplibre-gl.css"
 import type { CategoriaEvento } from "@/domain/eventos"
 import type { LatLng } from "@/domain/geo"
 import { type Camada, CAMADAS, urlDosBlocos } from "@/domain/gibs"
