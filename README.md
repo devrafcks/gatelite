@@ -12,7 +12,6 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/devrafcks/gatelite/actions/workflows/ci.yml"><img src="https://github.com/devrafcks/gatelite/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <img src="https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white" alt="Next.js 16">
   <img src="https://img.shields.io/badge/React-19-149ECA?logo=react&logoColor=white" alt="React 19">
   <img src="https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white" alt="TypeScript">
@@ -95,7 +94,7 @@
 | Órbitas | satellite.js (SGP4) a partir dos elementos OMM da CelesTrak, num Web Worker |
 | Astronomia | astronomy-engine (Sol, Lua, terminador) e d3-geo |
 | Estado | nuqs (a visão na URL), Zustand persistido (lugares salvos), TanStack Query |
-| Qualidade | TypeScript estrito, Vitest no domínio, Biome, GitHub Actions |
+| Qualidade | TypeScript estrito, Vitest no domínio, Biome |
 
 Sem banco de dados: a URL guarda a visão, o aparelho guarda os lugares e o servidor só faz cache das APIs externas.
 
@@ -124,7 +123,7 @@ src/
 | Photon e Open-Meteo | Busca de lugares e nome do ponto tocado no mapa |
 | Natural Earth | Continentes do globo pontilhado |
 
-Projeto independente, sem ligação oficial com a NASA. Detalhes de produto em [`product.md`](product.md).
+Projeto independente, sem ligação oficial com a NASA.
 
 ## Licença
 
